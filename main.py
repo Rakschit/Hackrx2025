@@ -19,6 +19,12 @@ async def upload_file(file: UploadFile = File(...)):
     
     size = os.path.getsize(temp_path)
     
+    try:
+        os.remove(temp_path)
+    except Exception as ae:
+        print(f"Failed to delete temp file:{ae}")
+
     return{
-        "filename": file.filename
+        "filename": file.filename,
+        "size": size
     }
