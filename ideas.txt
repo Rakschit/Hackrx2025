@@ -1,0 +1,10 @@
+1> If user sends a new document
+    - store new pdf text in the postgresql
+    - create new vector and store it in pinecone
+    - save the query and response in postgresql
+    ! Optional: 
+        - If there is a similar file it won't do this [increases one step]
+        - User will have the option to create a new vector to get better output 
+            - if the progrmam thinks it is not requierd to store the vector it will delete it [Increases two steps]
+
+2> Need to upload the model to read the doc
