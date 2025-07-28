@@ -1,4 +1,4 @@
-import fitz, docx
+import fitz
 import re
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -10,13 +10,13 @@ def extract_text_from_pdf(file_path):
     file.close()
     return text
 
-def extract_text_from_docx(file_path):
+'''def extract_text_from_docx(file_path):
     file = docx(file_path)
     text = ""
     for para in file.paragraphs:
         text += para.text + "\n"
     return text
-
+'''
 
 def clean_text(text):
     text = re.sub(r'\s+',' ',text)
