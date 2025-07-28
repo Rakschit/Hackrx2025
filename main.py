@@ -1,8 +1,8 @@
 from fastapi import FastAPI, File, UploadFile
 import shutil
 import os
-from file_utils import extract_text_from_pdf
-
+from file_utils import extract_text_from_pdf, extract_text_from_docx, clean_text, chunk_text
+from embeddings_utils import create_embeddings
 app = FastAPI()
 
 @app.post("/hackrx/run")
@@ -23,6 +23,10 @@ async def upload_file(file: UploadFile = File(...)):
     if file_type == ".pdf":
         file_content = extract_text_from_pdf(temp_path)
 
+    file_content = clean_text(file_content)
+    chunks = chunk_text(file_content)
+    index_path, chunks_path = create_embeddings(chunks)
+
     try:
         os.remove(temp_path)
     except Exception as ae:
@@ -31,5 +35,7 @@ async def upload_file(file: UploadFile = File(...)):
     return{
         "filename": file.filename,
         "size": size,
-        "text": file_content[:21]
+        "text": file_content[:21],
+        "index": index_path,
+        "chunks": chunks_path
     }
