@@ -8,7 +8,7 @@ app = FastAPI()
 async def upload_file(file: UploadFile = File(...)):
     
     file_type =  os.path.splitext(file.filename)[1].lower()
-    allowed = [".pdf", ".doc", ".eml"]
+    allowed = [".pdf", ".docx", ".eml"]
 
     if file_type not in allowed:
         return {"Error: Invalid file type"}
