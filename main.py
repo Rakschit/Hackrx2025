@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File, UploadFile
 import shutil
 import os
-from file_utils import extract_text_from_pdf, extract_text_from_docx, clean_text, chunk_text
+from file_utils import extract_text_from_pdf, clean_text, chunk_text
 from embeddings_utils import create_embeddings
 app = FastAPI()
 
