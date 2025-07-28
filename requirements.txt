@@ -2,3 +2,8 @@ fastapi
 uvicorn
 python-multipart
 PyMuPDF
+langchain-text-splitters
+sentence-transformers
+scikit-learn
+faiss-cpu
+numpy
