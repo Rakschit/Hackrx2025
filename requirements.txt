@@ -4,8 +4,9 @@ python-multipart
 PyMuPDF
 langchain-text-splitters
 sentence-transformers
+transformers
 scikit-learn
 faiss-cpu
+numpy
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.7.1+cpu
-numpy
