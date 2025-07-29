@@ -39,3 +39,7 @@ async def upload_file(file: UploadFile = File(...)):
         "index": index_path,
         "chunks": chunks_path
     }
+
+@app.post("/hackrx/hello")
+async def run():
+    return {"message": "hello"}
