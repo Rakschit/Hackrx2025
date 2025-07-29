@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Environment files
+.env
+*.env
+
+# Model files (optional – prevents large model weights from being baked into the image)
+*.pt
+*.bin
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# OS / Editor files
+.DS_Store
+.vscode/
+.idea/
