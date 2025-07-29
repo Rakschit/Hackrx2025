@@ -7,7 +7,7 @@ import pickle
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 def create_embeddings(chunks):
-    embeddings = model.encode(chunks, convert_to_numpy=True)
+    embeddings = model.encode(chunks, convert_to_numpy=True, show_progress_bar=True)
     embeddings = normalize(embeddings)
     dimension = embeddings.shape[1]
     
