@@ -1,5 +1,4 @@
 import fitz
-import re
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 def extract_text_from_pdf(file_path):
@@ -18,9 +17,7 @@ def extract_text_from_pdf(file_path):
     return text
 '''
 
-def clean_text(text):
-    text = re.sub(r'\s+',' ',text)
-    return text.strip()
+
 
 def chunk_text(cl_text):
     text_splitter = RecursiveCharacterTextSplitter(

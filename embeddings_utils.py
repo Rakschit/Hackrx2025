@@ -1,28 +1,37 @@
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
-import faiss
-import numpy as np
-import pickle
+import hashlib # add to requirements
+
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-def create_embeddings(chunks):
-    embeddings = model.encode(chunks, convert_to_numpy=True, show_progress_bar=True)
+def normalize_text(text):
+    text = " ".join(text.split())
+    return text
+
+def get_content_hash(normalized):
+    return hashlib.sha256(normalized.encode('utf-8')).hexdigest()
+
+def create_embeddings(chunks, index_id):
+    embeddings = model.encode(chunks, convert_to_numpy=True)
     embeddings = normalize(embeddings)
     dimension = embeddings.shape[1]
     
-    index = faiss.IndexFlatIP(dimension)
-    index = faiss.IndexIDMap(index)
-    ids = np.arange(len(embeddings))
-    index.add_with_ids(embeddings, ids)
+    vectors_to_upsert = []
 
-    # faiss.write_index(index, f"indexes/{file_name}vector.index")
-    index_path = "/tmp/vector.index"
-    chunks_path = "/tmp/chunks.pkl"
-    faiss.write_index(index, index_path)
-    
-    #with open(f"pickle/{file_name}chunks.pkl", "wb") as f:
-    with open(chunks_path, "wb") as f:
-        pickle.dump(chunks, f)
+    for i, vector in enumerate(embeddings):
+        vectors_to_upsert.append(
+            {
+                "id": f"{index_id}-{i}",
+                "values": vector.tolist(),
+                "metadata":{
+                "text": chunks[i],
+                "file_id": index_id
+            }
+        }
+    )
         
-    return index_path, chunks_path
+    return {"message": "New vector is upserted"}
+
+
+
