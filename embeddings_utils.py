@@ -1,8 +1,5 @@
 import hashlib # add to requirements
 
-
-
-
 def normalize_text(text):
     text = " ".join(text.split())
     return text

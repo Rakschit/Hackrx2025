@@ -5,7 +5,7 @@ from file_utils import extract_text_from_pdf, chunk_text
 from embeddings_utils import normalize_text, get_content_hash
 from vectorstore import get_pinecone_index, check_storedEmbeddings, create_embeddings 
 from dotenv import load_dotenv
-#from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse
 #import time
 
 load_dotenv()
@@ -49,8 +49,11 @@ async def upload_file(file: UploadFile = File(...)):
     allowed = [".pdf", ".docx", ".eml"]
 
     if file_type not in allowed:
-        return { "error" : "Invalid file type",
-            "reason": "Only accepts pdf, docx and eml files"}
+        error = {
+            "error" : "Invalid file type",
+            "reason": "Only accepts pdf, docx and eml files"
+        }
+        return JSONResponse(content=error)
     
     temp_path = f"/tmp/{file.filename}"
     with open(temp_path, "wb") as buffer:
