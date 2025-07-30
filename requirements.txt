@@ -11,3 +11,5 @@ numpy
 torch==2.7.1+cpu
 python-dotenv
 pinecone-client
+Pillow
+faiss-cpu
