@@ -90,6 +90,5 @@ async def upload_file(file: UploadFile = File(...)):
         "text": file_content[:21],
         "pc index" : str(pinecone_index) if pinecone_index else None,
         "pc api" : pc_api,
-        "is_id_there": is_id_there,
         "msg": msg
     }
