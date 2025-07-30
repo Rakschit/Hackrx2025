@@ -5,13 +5,13 @@ from file_utils import extract_text_from_pdf, chunk_text
 from embeddings_utils import normalize_text, get_content_hash, create_embeddings 
 from vectorstore import get_pinecone_index, check_storedEmbeddings
 from dotenv import load_dotenv
-from fastapi.responses import StreamingResponse
-import time
+#from fastapi.responses import StreamingResponse
+#import time
 
 load_dotenv()
     
 app = FastAPI()
-
+"""
 def process_file(file: UploadFile):
     file_type =  os.path.splitext(file.filename)[1].lower()
     allowed = [".pdf", ".docx", ".eml"]
@@ -39,11 +39,11 @@ def process_file(file: UploadFile):
         os.remove(temp_path)
     except Exception as ae:
         print(f"Failed to delete temp file:{ae}")
-
+"""
 @app.post("/hackrx/run")
 
 async def upload_file(file: UploadFile = File(...)):
-    """    
+      
     file_type =  os.path.splitext(file.filename)[1].lower()
     allowed = [".pdf", ".docx", ".eml"]
 
@@ -59,9 +59,11 @@ async def upload_file(file: UploadFile = File(...)):
     if file_type == ".pdf":
         file_content = extract_text_from_pdf(temp_path)
 
+    
     # Passing embeddings_utils Function
     file_content = normalize_text(file_content)
     file_id = get_content_hash(file_content)
+    """
     chunks = chunk_text(file_content)
 
     # Passing vectorstore Function
@@ -73,7 +75,7 @@ async def upload_file(file: UploadFile = File(...)):
     else:
         create_embeddings(chunks, file_id)
 
-
+    """
     try:
         os.remove(temp_path)
     except Exception as ae:
@@ -84,8 +86,8 @@ async def upload_file(file: UploadFile = File(...)):
         "file id" : file_id,
         "text": file_content[:21]
     }
-    """
-    return StreamingResponse(process_file(file), media_type="text/plain")
+    
+    #return StreamingResponse(process_file(file), media_type="text/plain")
 
 
 @app.post("/hackrx/hello")
