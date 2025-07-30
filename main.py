@@ -72,12 +72,15 @@ async def upload_file(file: UploadFile = File(...)):
     
     is_id_there = check_storedEmbeddings(pinecone_index,file_id)
 
+    matches = is_id_there.get("matches", [])
+    is_id_value = matches[0]["id"] if matches else None
+    """
     if(is_id_there["matches"]):
         msg = "vector for the file is already there, upserted"
     else:
         msg = "vector not present"
         #create_embeddings(chunks, file_id)
-
+    """
     try:
         os.remove(temp_path)
     except Exception as ae:
