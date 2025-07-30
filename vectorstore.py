@@ -1,5 +1,4 @@
 from pinecone import Pinecone, ServerlessSpec
-import numpy as np
 import os
 
 index_name = "hackrxindex"
@@ -23,11 +22,10 @@ def get_pinecone_index():
     
 
 def check_storedEmbeddings(pinecone_index,id_to_check):
-    dummy_vector = np.zeros(384).tolist()
     is_id_there = pinecone_index.query(
-        vector = dummy_vector,
+        vector = [0] * 384,
         top_k = 1,
-        include_metadata = True,
-        filter = {"file_id": id_to_check}
+        filter = {"file_id": id_to_check},
+        include_metadata = True
     )
-    return is_id_there
+    if( is_id_there and is_id_there.matches)

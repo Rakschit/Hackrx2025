@@ -72,12 +72,11 @@ async def upload_file(file: UploadFile = File(...)):
     
     is_id_there = check_storedEmbeddings(pinecone_index,file_id)
 
-    if(is_id_there["matches"]):
+    if(is_id_there.to_dict().get("matches")):
         msg = "vector for the file is already there, upserted"
-
     else:
         msg = create_embeddings(chunks, file_id)
-        
+
     try:
         os.remove(temp_path)
     except Exception as ae:
@@ -87,7 +86,5 @@ async def upload_file(file: UploadFile = File(...)):
         "filename": file.filename,
         "file id" : file_id,
         "text": file_content[:21],
-        "pc index" : str(pinecone_index) if pinecone_index else None,
-        "pc api" : pc_api,
         "msg": msg
     }
