@@ -68,15 +68,15 @@ async def upload_file(file: UploadFile = File(...)):
     
     # Passing vectorstore Function
     pinecone_index, pc_api = get_pinecone_index()
-    """
-    is_id_there = check_storedEmbeddings(pinecone_index,file_id)
-    if(is_id_there["matches"]):
-        return {"message":"vector for the file is already there","upserted":"no"}
     
-    else:
-        create_embeddings(chunks, file_id)
+    is_id_there = check_storedEmbeddings(pinecone_index,file_id)
 
-    """
+    if(is_id_there["matches"]):
+        msg = "vector for the file is already there, upserted"
+
+    else:
+        msg = create_embeddings(chunks, file_id)
+
     try:
         os.remove(temp_path)
     except Exception as ae:
@@ -87,5 +87,7 @@ async def upload_file(file: UploadFile = File(...)):
         "file id" : file_id,
         "text": file_content[:21],
         "pc index" : str(pinecone_index) if pinecone_index else None,
-        "pc api" : pc_api
+        "pc api" : pc_api,
+        "is_id_there": is_id_there,
+        "msg": msg
     }
