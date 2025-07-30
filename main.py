@@ -96,17 +96,20 @@ async def upload_file(file: UploadFile = File(...)):
         "id_value": is_id_value
     }
 
-import httpx
+from fastapi import FastAPI, Request
 
-COLAB_URL = "https://ed89cb3e8940.ngrok-free.app/how_are_you"
+app = FastAPI()
 
 @app.post("/test")
-async def greetings():
-    async with httpx.AsyncClient(verify=True) as client:
-        response = await client.get(COLAB_URL)  # HTTPS request
-        colab_reply = response.text
-        
+async def greetings(request: Request):
+    # Get JSON sent from Kaggle
+    data = await request.json()
+    kaggle_message = data.get("message", "No message")
+
+    # Prepare a reply
+    reply = f"Hello! I received your message: {kaggle_message}"
+
     return {
         "local": "Hello",
-        "colab": colab_reply
+        "kaggle_reply": reply
     }
