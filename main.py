@@ -2,8 +2,8 @@ from fastapi import FastAPI, File, UploadFile
 import shutil
 import os
 from file_utils import extract_text_from_pdf, chunk_text
-from embeddings_utils import normalize_text, get_content_hash, create_embeddings 
-from vectorstore import get_pinecone_index, check_storedEmbeddings
+from embeddings_utils import normalize_text, get_content_hash
+from vectorstore import get_pinecone_index, check_storedEmbeddings, create_embeddings 
 from dotenv import load_dotenv
 #from fastapi.responses import StreamingResponse
 #import time
@@ -74,13 +74,12 @@ async def upload_file(file: UploadFile = File(...)):
 
     matches = is_id_there.get("matches", [])
     is_id_value = matches[0]["id"] if matches else None
-    """
+
     if(is_id_there["matches"]):
         msg = "vector for the file is already there, upserted"
     else:
         msg = "vector not present"
-        #create_embeddings(chunks, file_id)
-    """
+        create_embeddings(chunks, file_id, pinecone_index)
     try:
         os.remove(temp_path)
     except Exception as ae:
