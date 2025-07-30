@@ -10,6 +10,6 @@ numpy
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.7.1+cpu
 python-dotenv
-pinecone-client
+pinecone
 Pillow
 faiss-cpu
