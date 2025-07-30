@@ -35,6 +35,11 @@ def process_file(file: UploadFile):
         
     yield "Processing complete.\n"
 
+    try:
+        os.remove(temp_path)
+    except Exception as ae:
+        print(f"Failed to delete temp file:{ae}")
+
 @app.post("/hackrx/run")
 
 async def upload_file(file: UploadFile = File(...)):
