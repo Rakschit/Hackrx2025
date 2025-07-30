@@ -39,8 +39,6 @@ async def upload_file(file: UploadFile = File(...)):
     file_id = get_content_hash(file_content)
     chunks = chunk_text(file_content)
 
-    index_path, chunks_path = create_embeddings(chunks)
-
     # Passing vectorstore Function
     pinecone_index = get_pinecone_index()
     is_id_there = check_storedEmbeddings(pinecone_index,file_id)
