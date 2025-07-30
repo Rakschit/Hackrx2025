@@ -67,7 +67,7 @@ async def upload_file(file: UploadFile = File(...)):
     chunks = chunk_text(file_content)
     
     # Passing vectorstore Function
-    pinecone_index = get_pinecone_index()
+    pinecone_index, pc_api = get_pinecone_index()
     """
     is_id_there = check_storedEmbeddings(pinecone_index,file_id)
     if(is_id_there["matches"]):
@@ -86,7 +86,8 @@ async def upload_file(file: UploadFile = File(...)):
         "filename": file.filename,
         "file id" : file_id,
         "text": file_content[:21],
-        "pc index" : pinecone_index
+        "pc index" : pinecone_index,
+        "pc api" : pc_api
     }
     
     #return StreamingResponse(process_file(file), media_type="text/plain")
