@@ -72,10 +72,11 @@ async def upload_file(file: UploadFile = File(...)):
     
     is_id_there = check_storedEmbeddings(pinecone_index,file_id)
 
-    if(is_id_there.to_dict().get("matches")):
+    if(is_id_there["matches"]):
         msg = "vector for the file is already there, upserted"
     else:
-        msg = create_embeddings(chunks, file_id)
+        msg = "vector not present"
+        #create_embeddings(chunks, file_id)
 
     try:
         os.remove(temp_path)
@@ -86,5 +87,6 @@ async def upload_file(file: UploadFile = File(...)):
         "filename": file.filename,
         "file id" : file_id,
         "text": file_content[:21],
-        "msg": msg
+        "msg": msg,
+        "is_id": is_id_there
     }
