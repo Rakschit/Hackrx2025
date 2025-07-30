@@ -4,7 +4,9 @@ import os
 from file_utils import extract_text_from_pdf, chunk_text
 from embeddings_utils import normalize_text, get_content_hash, create_embeddings 
 from vectorstore import get_pinecone_index, check_storedEmbeddings
+from dotenv import load_dotenv
 
+load_dotenv()
 app = FastAPI()
 
 @app.post("/hackrx/run")

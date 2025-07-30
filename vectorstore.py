@@ -1,13 +1,18 @@
 from pinecone import Pinecone, ServerlessSpec
-from dotenv import load_dotenv
 import numpy as np
 import os
 
-load_dotenv()
 index_name = "hackrxindex"
 
 def get_pinecone_index():
-    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+    api_key=os.getenv("PINECONE_API_KEY")
+
+    if not api_key:
+        raise RuntimeError("PINECONE_API_KEY not set!")
+    
+    pc = Pinecone(api_key)
+
+   
 
     if index_name not in pc.list_indexes().names():
         pc.create_index(
