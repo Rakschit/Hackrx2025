@@ -5,20 +5,40 @@ from file_utils import extract_text_from_pdf, chunk_text
 from embeddings_utils import normalize_text, get_content_hash, create_embeddings 
 from vectorstore import get_pinecone_index, check_storedEmbeddings
 from dotenv import load_dotenv
+from fastapi.responses import StreamingResponse
+import time
 
 load_dotenv()
-
-required_vars = ["PINECONE_API_KEY"]
-for var in required_vars:
-    if not os.getenv(var):
-        raise RuntimeError(f"Missing required environment variable: {var}")
     
 app = FastAPI()
 
+def process_file(file: UploadFile):
+    file_type =  os.path.splitext(file.filename)[1].lower()
+    allowed = [".pdf", ".docx", ".eml"]
+
+    if file_type not in allowed:
+        return { "error" : "Invalid file type",
+            "reason": "Only accepts pdf, docx and eml files"
+        }
+    
+    yield "File type validated.\n"
+
+    temp_path = f"/tmp/{file.filename}"
+    with open(temp_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    # Passing file_utils Function
+    if file_type == ".pdf":
+        yield "Extracting text from PDF...\n"
+        file_content = extract_text_from_pdf(temp_path)
+        yield f"Text extraction complete. Extracted {len(file_content)} characters.\n"
+        
+    yield "Processing complete.\n"
 
 @app.post("/hackrx/run")
+
 async def upload_file(file: UploadFile = File(...)):
-    
+    """    
     file_type =  os.path.splitext(file.filename)[1].lower()
     allowed = [".pdf", ".docx", ".eml"]
 
@@ -59,6 +79,8 @@ async def upload_file(file: UploadFile = File(...)):
         "file id" : file_id,
         "text": file_content[:21]
     }
+    """
+    return StreamingResponse(process_file(file), media_type="text/plain")
 
 
 @app.post("/hackrx/hello")
