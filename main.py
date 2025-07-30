@@ -86,13 +86,6 @@ async def upload_file(file: UploadFile = File(...)):
         "filename": file.filename,
         "file id" : file_id,
         "text": file_content[:21],
-        "pc index" : pinecone_index,
+        "pc index" : str(pinecone_index) if pinecone_index else None,
         "pc api" : pc_api
     }
-    
-    #return StreamingResponse(process_file(file), media_type="text/plain")
-
-
-@app.post("/hackrx/hello")
-async def run():
-    return {"message": "hello"}
