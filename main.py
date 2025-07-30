@@ -7,7 +7,14 @@ from vectorstore import get_pinecone_index, check_storedEmbeddings
 from dotenv import load_dotenv
 
 load_dotenv()
+
+required_vars = ["PINECONE_API_KEY"]
+for var in required_vars:
+    if not os.getenv(var):
+        raise RuntimeError(f"Missing required environment variable: {var}")
+    
 app = FastAPI()
+
 
 @app.post("/hackrx/run")
 async def upload_file(file: UploadFile = File(...)):
