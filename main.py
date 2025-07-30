@@ -57,9 +57,7 @@ async def upload_file(file: UploadFile = File(...)):
     return{
         "filename": file.filename,
         "file id" : file_id,
-        "text": file_content[:21],
-        "index": index_path,
-        "chunks": chunks_path
+        "text": file_content[:21]
     }
 
 
