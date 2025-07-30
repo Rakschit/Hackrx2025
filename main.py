@@ -91,5 +91,5 @@ async def upload_file(file: UploadFile = File(...)):
         "file id" : file_id,
         "text": file_content[:21],
         "msg": msg,
-        "is_id": is_id_there["matches"][0]["id"]
+        "id_value": is_id_value
     }
