@@ -44,6 +44,7 @@ def process_file(file: UploadFile):
 
 async def upload_file(file: UploadFile = File(...)):
       
+    msg =""
     file_type =  os.path.splitext(file.filename)[1].lower()
     allowed = [".pdf", ".docx", ".eml"]
 
@@ -74,9 +75,10 @@ async def upload_file(file: UploadFile = File(...)):
     if(is_id_there["matches"]):
         msg = "vector for the file is already there, upserted"
 
+    """
     else:
         msg = create_embeddings(chunks, file_id)
-
+    """
     try:
         os.remove(temp_path)
     except Exception as ae:
