@@ -95,3 +95,18 @@ async def upload_file(file: UploadFile = File(...)):
         "msg": msg,
         "id_value": is_id_value
     }
+
+import httpx
+
+COLAB_URL = "https://ed89cb3e8940.ngrok-free.app/how_are_you"
+
+@app.post("/test")
+async def greetings():
+    async with httpx.AsyncClient(verify=True) as client:
+        response = await client.get(COLAB_URL)  # HTTPS request
+        colab_reply = response.text
+        
+    return {
+        "local": "Hello",
+        "colab": colab_reply
+    }
