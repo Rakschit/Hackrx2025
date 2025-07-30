@@ -63,12 +63,13 @@ async def upload_file(file: UploadFile = File(...)):
     # Passing embeddings_utils Function
     file_content = normalize_text(file_content)
     file_id = get_content_hash(file_content)
-    """
+    
     chunks = chunk_text(file_content)
-
+    
     # Passing vectorstore Function
     pinecone_index = get_pinecone_index()
     is_id_there = check_storedEmbeddings(pinecone_index,file_id)
+    """
     if(is_id_there["matches"]):
         return {"message":"vector for the file is already there","upserted":"no"}
     
@@ -84,7 +85,9 @@ async def upload_file(file: UploadFile = File(...)):
     return{
         "filename": file.filename,
         "file id" : file_id,
-        "text": file_content[:21]
+        "text": file_content[:21],
+        "pc index" : pinecone_index,
+        "isid" : is_id_there
     }
     
     #return StreamingResponse(process_file(file), media_type="text/plain")
