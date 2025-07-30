@@ -28,4 +28,5 @@ def check_storedEmbeddings(pinecone_index,id_to_check):
         filter = {"file_id": id_to_check},
         include_metadata = True
     )
-    if( is_id_there and is_id_there.matches)
+    
+    return is_id_there
