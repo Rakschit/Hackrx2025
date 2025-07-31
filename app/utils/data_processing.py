@@ -5,7 +5,6 @@ nltk.data.path.append(str(Path(__file__).resolve().parent.parent / "nltk_data"))
 
 from nltk.tokenize import sent_tokenize
 
-
 def ex(text):
     new_text = sent_tokenize(text)
-    return ex
+    return new_text
