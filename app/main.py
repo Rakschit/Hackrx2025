@@ -1,29 +1,15 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
-from pathlib import Path
+from app.utils.text_extraction import extract_text_from_pdf
+from app.utils.data_processing import ex
 import os, shutil
-import nltk
-import fitz
-
-# Set nltk_data path once
-nltk.data.path.append(str(Path(__file__).resolve().parent.parent / "nltk_data"))
-
-from nltk.tokenize import sent_tokenize
 
 app = FastAPI()
 
-def extract_text_from_pdf(file_path):
-    file = fitz.open(file_path)
-    text = ""
-    for page in file:
-        text += page.get_text("text")
-    file.close()
-    return text
-
 @app.post("/")
 def read_root():
-    text = "Hello Railway! Tokenization works offline."
-    return sent_tokenize(text)
+    text = "Hello Railway!"
+    return text
 
 @app.post("/hackrx/run")
 async def upload_file(file: UploadFile = File(...)):
@@ -49,5 +35,6 @@ async def upload_file(file: UploadFile = File(...)):
         # Placeholder for DOCX/EML extraction
         file_content = f"{file.filename} uploaded, but extraction not implemented."
 
-    new_text = sent_tokenize(file_content)
+    new_text = ex(file_content)
+
     return new_text
