@@ -9,7 +9,6 @@ from app.utils.text_extraction import extract_text_from_pdf
 from app.utils.data_processing import ex
 
 load_dotenv()
-BEARER_API_KEY = os.getenv("BEARER_API_KEY")
 
 app = FastAPI()
 
@@ -18,6 +17,9 @@ class RunRequest(BaseModel):
     question: List[str]
 
 def verify_bearer(authorization: str = Header(...)):
+    BEARER_API_KEY = os.getenv("BEARER_API_KEY")
+    if not BEARER_API_KEY:
+        raise HTTPException(status_code=500, detail="Server misconfiguration: BEARER_API_KEY not set")
     if authorization != f"Bearer {BEARER_API_KEY}":
         raise HTTPException(status_code=401, detail="Unauthorized")
 
@@ -40,15 +42,11 @@ def save_and_extract(file: UploadFile):
 
 """
 
-
-
-
-
 @app.post("/hackrx/run")
 async def run_query(
     request: RunRequest, _: None = Depends(verify_bearer)):
 
-    if not request.questions or not all(isinstance(q, str) for q in data.questions):
+    if not request.questions or not all(isinstance(q, str) for q in request.questions):
         raise HTTPException(status_code=400, detail="Questions must be a list of strings")
     
     doc_url = str(request.documents)
