@@ -3,3 +3,5 @@ uvicorn
 python-multipart
 PyMuPDF
 nltk
+pydantic
+python-dotenv
