@@ -30,7 +30,7 @@ def validate_request(request: RunRequest):
     
     # VALIDATING FILE
     if doc_type not in allowed_types:
-        raise HTTPException(status_code=400, detail=f"Only pdf, docx, eml files allowed{doc_type}")
+        raise HTTPException(status_code=400, detail="Only pdf, docx, eml files allowed")
     
     file_extension = allowed_types[doc_type]
 

@@ -35,11 +35,12 @@ def clean_text(text: str, page_count: int) -> str:
 
     # Count frequency of lines
     line_counts = Counter(lines)
+    
+    freq_threshold = page_count
 
     if freq_threshold > 3:
         freq_threshold = 3
-    else:
-        freq_threshold = page_count
+        
     # Remove lines that appear more often than freq_threshold
     cleaned_lines = [
         line for line in lines if line_counts[line] < freq_threshold
