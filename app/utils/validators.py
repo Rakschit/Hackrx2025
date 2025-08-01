@@ -25,7 +25,7 @@ def validate_request(request: RunRequest):
         raise HTTPException(status_code=400, detail="Questions must be a list of strings")
     
     doc_url = str(request.document)
-    resp = requests.head(doc_url, allow_redirects=True)
+    resp = requests.head(doc_url, stream=True, allow_redirects=True)
     doc_type = resp.headers.get("Content-Type","").lower()
     
     # VALIDATING FILE
