@@ -13,7 +13,7 @@ def ex(text):
 import re
 from collections import Counter
 
-def clean_text(text: str, freq_threshold: int = page_count) -> str:
+def clean_text(text: str, page_count: int) -> str:
     """
     Light cleaning:
     - Normalize encoding
@@ -38,7 +38,8 @@ def clean_text(text: str, freq_threshold: int = page_count) -> str:
 
     if freq_threshold > 3:
         freq_threshold = 3
-        
+    else:
+        freq_threshold = page_count
     # Remove lines that appear more often than freq_threshold
     cleaned_lines = [
         line for line in lines if line_counts[line] < freq_threshold
