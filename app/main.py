@@ -18,7 +18,7 @@ def verify_bearer(authorization: str = Header(...)):
         raise HTTPException(status_code=401, detail="Unauthorized")
 
 class RunRequest(BaseModel):
-    documents: HttpUrl
+    document: HttpUrl
     question: List[str]
 
 allowed_extension = [".pdf", ".docx", ".eml"]
