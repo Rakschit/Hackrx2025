@@ -33,7 +33,6 @@ def clean_text(text: str, page_count: int) -> str:
     text = cleaned_lines
     # Remove extra white spaces
     text = re.sub(r'\s+', ' ', text).strip()
-
     return text
 
 def split_into_sentences(text):
@@ -87,8 +86,8 @@ def create_chunks(sentences, min_words_no_chunk=340, max_chunk_words=500, overla
 
     return chunks
 
-def ready_for_embeddings(text,page):
-    cleaned_text = clean_text(text,page)
+def ready_for_embeddings(text, page):
+    cleaned_text = clean_text(text, page)
     sentences = split_into_sentences(" ".join(cleaned_text))
     chunks = create_chunks(sentences)
 

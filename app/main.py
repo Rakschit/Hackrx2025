@@ -17,7 +17,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     if file_extension == "pdf":
         text,page = extract_text_from_pdf(temp_path)
 
-    chunks = ready_for_embeddings(text,page)    
+    chunks = ready_for_embeddings(text, page)    
 
     # Removing temporary file after processing
     try:
