@@ -2,7 +2,7 @@ import os
 from fastapi import Header, HTTPException
 import requests
 from urllib.parse import urlparse
-from app.main import RunRequest
+from app.models import RunRequest
 
 BEARER_API_KEY = os.getenv("BEARER_API_KEY")
 
@@ -20,13 +20,15 @@ allowed_types = {
 }
 
 def validate_request(request: RunRequest):
+    # VALIDATING QUESTION
     if not request.questions or not all(isinstance(q, str) for q in request.questions):
         raise HTTPException(status_code=400, detail="Questions must be a list of strings")
     
     doc_url = str(request.document)
     resp = requests.head(doc_url, allow_redirects=True)
     doc_type = resp.headers.get("Content-Type","").lower()
-
+    
+    # VALIDATING FILE
     if doc_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Only pdf, docx, eml files allowed")
     

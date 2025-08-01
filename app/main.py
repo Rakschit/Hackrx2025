@@ -1,17 +1,13 @@
 from fastapi import FastAPI, Depends
-from pydantic import BaseModel, HttpUrl
 import os, shutil
-from typing import List
+
 
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
 from app.utils.data_processing import ex
+from app.models import RunRequest
 
 app = FastAPI()
-
-class RunRequest(BaseModel):
-    document: HttpUrl
-    questions: List[str]
 
 @app.post("/hackrx/run")
 async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
