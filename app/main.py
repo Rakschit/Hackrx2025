@@ -8,16 +8,16 @@ from dotenv import load_dotenv
 from app.utils.text_extraction import extract_text_from_pdf
 from app.utils.data_processing import ex
 
-load_dotenv()
-
 app = FastAPI()
+
+load_dotenv()
+BEARER_API_KEY = os.getenv("BEARER_API_KEY")
 
 class RunRequest(BaseModel):
     documents: HttpUrl
     question: List[str]
 
 def verify_bearer(authorization: str = Header(...)):
-    BEARER_API_KEY = os.getenv("BEARER_API_KEY")
     if not BEARER_API_KEY:
         raise HTTPException(status_code=500, detail="Server misconfiguration: BEARER_API_KEY not set")
     if authorization != f"Bearer {BEARER_API_KEY}":
