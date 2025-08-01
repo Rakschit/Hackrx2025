@@ -76,7 +76,7 @@ async def run_query(
 
     return {
         "document": doc_url,
-        "questions": request.question,
+        "question": request.question,
         "text_preview": text[:200]
     }
 
