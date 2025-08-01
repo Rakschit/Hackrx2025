@@ -3,7 +3,7 @@ import os, shutil
 
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
-from app.utils.data_processing import clean_text
+from app.utils.data_processing import ready_for_embeddings
 from app.models import RunRequest
 
 app = FastAPI()
@@ -17,7 +17,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     if file_extension == "pdf":
         text,page = extract_text_from_pdf(temp_path)
 
-    text = clean_text(text,page)    
+    chunks = ready_for_embeddings(text,page)    
 
     # Removing temporary file after processing
     try:
@@ -29,6 +29,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
         "extension": file_extension,
         "questions": request.questions,
         "page": page,
+        "chunks length": len(chunks)
     }
 
 @app.post("/")
