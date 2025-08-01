@@ -1,7 +1,7 @@
 import os
 from fastapi import Header, HTTPException
 import requests
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 from app.models import RunRequest
 
 BEARER_API_KEY = os.getenv("BEARER_API_KEY")
@@ -36,7 +36,21 @@ def validate_request(request: RunRequest):
 
     # Prepare temp file path
     parsed = urlparse(doc_url)
-    filename = os.path.basename(parsed.path) or f"tempfile.{file_extension}"
+    filename = os.path.basename(parsed.path)
+    filename = unquote(filename) if filename else f"tempfile.{file_extension}"
     temp_path = f"/tmp/{filename}"
     
+    download_file(doc_url, temp_path) # DOWNLOAD FILE AFTER VALIDATING
+
     return file_extension, temp_path
+
+
+
+def download_file(doc_url, temp_path):
+    try:
+        r = requests.get(doc_url, timeout=15)
+        r.raise_for_status()
+        with open(temp_path, "wb") as f:
+            f.write(r.content)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Download failed: {e}")
