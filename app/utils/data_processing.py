@@ -6,7 +6,6 @@ nltk.data.path.append(str(Path(__file__).resolve().parent.parent.parent / "nltk_
 from nltk.tokenize import sent_tokenize
 
 def clean_text(text: str, page_count: int) -> str:
-
     # Normalize encoding
     text = text.encode('utf-8', errors='ignore').decode('utf-8')
 
@@ -22,16 +21,18 @@ def clean_text(text: str, page_count: int) -> str:
     # Count frequency of lines
     line_counts = Counter(lines)
 
-    freq_threshold = page_count
-    if freq_threshold > 3:
-        freq_threshold = 3
-        
-    # Remove lines that appear more often than freq_threshold
+    # Threshold: max 3
+    freq_threshold = min(page_count, 3)
+
+    # Remove frequent lines
     cleaned_lines = [
         line for line in lines if line_counts[line] < freq_threshold
     ]
-    text = cleaned_lines
-    # Remove extra white spaces
+
+    # Join list back into a string
+    text = " ".join(cleaned_lines)
+
+    # Normalize spaces
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
