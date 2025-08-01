@@ -19,7 +19,7 @@ def verify_bearer(authorization: str = Header(...)):
 
 class RunRequest(BaseModel):
     document: HttpUrl
-    question: List[str]
+    questions: List[str]
 
 allowed_extension = [".pdf", ".docx", ".eml"]
 
@@ -47,7 +47,7 @@ async def run_query(
     if not request.questions or not all(isinstance(q, str) for q in request.questions):
         raise HTTPException(status_code=400, detail="Questions must be a list of strings")
     
-    doc_url = str(request.documents)
+    doc_url = str(request.document)
     filename = os.path.basename(doc_url.split("?")[0])
     ext = os.path.splitext(filename)[1].lower()
 
@@ -76,7 +76,7 @@ async def run_query(
 
     return {
         "document": doc_url,
-        "question": request.question,
+        "questions": request.questions,
         "text_preview": text[:200]
     }
 
