@@ -3,25 +3,23 @@ from pydantic import BaseModel, HttpUrl
 from fastapi.responses import JSONResponse
 import os, shutil
 from typing import List
-from dotenv import load_dotenv
 
 from app.utils.text_extraction import extract_text_from_pdf
 from app.utils.data_processing import ex
 
 app = FastAPI()
 
-load_dotenv()
 BEARER_API_KEY = os.getenv("BEARER_API_KEY")
-
-class RunRequest(BaseModel):
-    documents: HttpUrl
-    question: List[str]
 
 def verify_bearer(authorization: str = Header(...)):
     if not BEARER_API_KEY:
         raise HTTPException(status_code=500, detail="Server misconfiguration: BEARER_API_KEY not set")
     if authorization != f"Bearer {BEARER_API_KEY}":
         raise HTTPException(status_code=401, detail="Unauthorized")
+
+class RunRequest(BaseModel):
+    documents: HttpUrl
+    question: List[str]
 
 allowed_extension = [".pdf", ".docx", ".eml"]
 
@@ -78,7 +76,7 @@ async def run_query(
 
     return {
         "document": doc_url,
-        "questions": request.questions,
+        "questions": request.question,
         "text_preview": text[:200]
     }
 
