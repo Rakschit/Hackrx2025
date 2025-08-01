@@ -3,6 +3,8 @@ from pydantic import BaseModel, HttpUrl
 from fastapi.responses import JSONResponse
 import os, shutil
 from typing import List
+import requests
+from urllib.parse import urlparse
 
 from app.utils.text_extraction import extract_text_from_pdf
 from app.utils.data_processing import ex
@@ -21,7 +23,6 @@ class RunRequest(BaseModel):
     document: HttpUrl
     questions: List[str]
 
-allowed_extension = [".pdf", ".docx", ".eml"]
 
 """
 def save_and_extract(file: UploadFile):
@@ -48,27 +49,39 @@ async def run_query(
         raise HTTPException(status_code=400, detail="Questions must be a list of strings")
     
     doc_url = str(request.document)
-    filename = os.path.basename(doc_url.split("?")[0])
-    ext = os.path.splitext(filename)[1].lower()
+    resp = requests.head(doc_url, allow_redirects=True)
+    doc_type = resp.headers.get("Content-Type","").lower()
 
-    if ext not in allowed_extension:
+    # CHECKING EXTENSION
+    allowed_types = {
+        "application/pdf": "pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+        "message/rfc822": "eml"
+    }
+
+    if doc_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Only pdf, docx, eml files allowed")
     
+    ext = allowed_types[doc_type]
+
+    parsed = urlparse(doc_url)
+    filename = os.path.basename(parsed.path) or "tempfile"
     temp_path = f"/tmp/{filename}"
 
     try:
-        r = request.get(doc_url, timeout=15)
+        r = requests.get(doc_url, timeout=15)
         r.raise_for_status()
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to download document: {e}")
 
     with open(temp_path, "wb") as f:
         f.write(r.content)
-
-    if ext == ".pdf":
+        
     # Extract text
+    if ext == "pdf":
         text = extract_text_from_pdf(temp_path)
 
+    # Removing temporary file after processing
     try:
         os.remove(temp_path)
     except FileNotFoundError:
