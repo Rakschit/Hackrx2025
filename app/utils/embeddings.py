@@ -56,10 +56,8 @@ def store_embeddings(chunks, index_id, pinecone_index):
     index = pc.Index(pinecone_index)
     index.upsert(vector = embeddings)
 
-def create_embeddings(chunks,index_id):
-    pinecone_index = get_pinecone_index()
+def create_embeddings(chunks,index_id, pinecone_index):
     store_embeddings(chunks, index_id, pinecone_index)
-
     return 
 
 
