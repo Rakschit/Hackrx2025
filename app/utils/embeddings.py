@@ -33,34 +33,62 @@ def check_storedEmbeddings(pinecone_index,id_to_check):
     )
     return is_id_there.to_dict()
 """
-
+# text-embedding-004, gemini-embedding-001
 def create_embeddings(chunks, index_id):
     gemini_key = os.getenv("GEMINI_API_KEY")
     client = genai.Client(api_key=gemini_key)
 
     response = client.models.embed_content(
-        # text-embedding-004, gemini-embedding-001
+        
         model="gemini-embedding-001",  # Gemini embedding model
         contents = chunks              # pass the whole list
     )
 
-    embeddings = []
-    for i, emb in enumerate(response.embeddings):
-        metadata = {
-            "text": chunks[i],
-            "file_id": index_id,
-            "chunk_id": f"{index_id}-{i}",
-            "version": DATA_PROCESSING_VERSION
-        }
-        
-        embeddings.append((
-            f"{index_id}-{i}",  
-            emb.values,         
-            metadata            
-        ))
+    all_embeddings = []
+    API_BATCH_SIZE = 0
+    for i in range(0, len(chunks), API_BATCH_SIZE):
+        # Get the current batch of chunks
+        request_batch = chunks[i:i+API_BATCH_SIZE]
 
-    return embeddings
+        try:
+            # Make the API call for the current batch
+            response = genai.embed_content(
+                model="models/embedding-001",  # Using the 'models/' prefix is good practice
+                content=request_batch,
+                task_type="RETRIEVAL_DOCUMENT"
+            )
 
+            # Process the response for the current batch
+            for j, emb in enumerate(response['embedding']):
+                # Calculate the original index of the chunk
+                original_chunk_index = i + j
+                
+                metadata = {
+                    "text": chunks[original_chunk_index],
+                    "file_id": index_id,
+                    "chunk_id": f"{index_id}-{original_chunk_index}",
+                    "version": DATA_PROCESSING_VERSION
+                }
+                
+                all_embeddings.append((
+                    f"{index_id}-{original_chunk_index}",  
+                    emb,         
+                    metadata            
+                ))
+
+        except Exception as e:
+            print(f"An error occurred during batch {i//API_BATCH_SIZE + 1}: {e}")
+            # You might want to decide here if you want to continue or stop
+            # For now, we'll just print and continue
+            continue
+
+    return all_embeddings
+
+
+
+    
+    # Process the chunks in batches of 100
+    
 """
     for i, vector in enumerate(embeddings):
         vectors_to_upsert.append(
