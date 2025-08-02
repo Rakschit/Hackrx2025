@@ -97,7 +97,7 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
     for question in questions:
         # Generate embedding for the question using Gemini
         query_response = client.models.embed_content(
-            model="gemini-embedding-001",
+            model="text-embedding-004",
             contents=[question]
         )
 
