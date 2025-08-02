@@ -38,7 +38,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     
     pinecone_index = get_pinecone_index()
     embeddings = create_embeddings(chunks, file_id)
-    pinecone_index.upsert(emb=embeddings)
+    pinecone_index.upsert(vectors = embeddings)
 
     # Removing temporary file after processing
     try:
@@ -47,7 +47,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
         pass
 
     return {
-        "chunks lenght": len(chunks) 
+        "chunks length": len(chunks) 
     }
 
 @app.post("/")
