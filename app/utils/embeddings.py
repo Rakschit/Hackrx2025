@@ -21,16 +21,17 @@ def get_pinecone_index():
         )
     return pc.Index(index_name)
 
-"""
-def check_storedEmbeddings(pinecone_index,id_to_check):
-    is_id_there = pinecone_index.query(
-        vector = [0] * 384,             # replace with gemini option
-        top_k = 1,
-        filter = {"file_id": id_to_check},
-        include_metadata = True
+def check_storedEmbeddings(pinecone_index, id_to_check):
+    # Create a dummy vector of the correct dimension (e.g., 768 for gemini)
+    dummy_vector = [0] * 3072  # for gemini-embedding-001
+
+    result = pinecone_index.query(
+        vector=dummy_vector,
+        top_k=1,
+        namespace=id_to_check,   # search only in this namespace
+        include_metadata=True
     )
-    return is_id_there.to_dict()
-"""
+    return result.to_dict()
 
 def store_embeddings(chunks, index_id, pinecone_index):
     
@@ -45,21 +46,20 @@ def store_embeddings(chunks, index_id, pinecone_index):
     for i, emb in enumerate(response.embeddings):
         metadata = {
             "text": chunks[i],
-            "file_id": index_id,
-            "chunk_id": f"pdf-{i}",
             "version": DATA_PROCESSING_VERSION
         }
 
         embeddings.append((
-            f"pdf-{i}",     # unique ID
+            f"{index_id}-{i}",     # unique ID
             emb.values,     # embedding vector from list
             metadata
         ))
 
     # Upload all embeddings to Pinecone
-    pinecone_index.upsert(vectors=embeddings)
-
-
+    pinecone_index.upsert(
+        vectors=embeddings,
+        namespace = f"index_id",
+    )
 
 def create_embeddings(chunks,index_id, pinecone_index):
     store_embeddings(chunks, index_id, pinecone_index)
