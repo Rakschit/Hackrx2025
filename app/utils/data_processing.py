@@ -1,6 +1,7 @@
 import re
 from collections import Counter
 import nltk
+import unicodedata
 from pathlib import Path
 nltk.data.path.append(str(Path(__file__).resolve().parent.parent.parent / "nltk_data"))
 from nltk.tokenize import sent_tokenize
@@ -8,12 +9,19 @@ from nltk.tokenize import sent_tokenize
 def clean_text(text: str, page_count: int) -> str:
     # Normalize encoding
     text = text.encode('utf-8', errors='ignore').decode('utf-8')
+    text = unicodedata.normalize("NFKC",text)
+
+    # changing dash unicode to dash
+    text = text.replace("\u2013", "-")
 
     # Remove common patterns
     text = re.sub(r'\bPage\s*[:\-]?\s*\d+\s*(of|out\s+of)?\s*\d*\b','', text, flags=re.IGNORECASE)
     text = re.sub(r'^\s*\d+\s*$', '', text, flags=re.MULTILINE)  # standalone numbers
     text = re.sub(r'\S+@\S+', '', text)  # emails
     text = re.sub(r'http\S+', '', text)  # urls
+
+    
+    
 
     # Split into lines
     lines = [line.strip() for line in text.splitlines() if line.strip()]
@@ -87,9 +95,8 @@ def create_chunks(sentences, min_words_no_chunk=340, max_chunk_words=500, overla
 
     return chunks
 
-def ready_for_embeddings(text, page):
+def prepare_for_embeddings(text, page):
     cleaned_text = clean_text(text, page)
     sentences = split_into_sentences(" ".join(cleaned_text))
     chunks = create_chunks(sentences)
-
     return chunks
