@@ -43,7 +43,7 @@ def store_embeddings(chunks, index_id, pinecone_index):
             contents = chunk
         )
 
-        emb = response.embedding
+        emb = response.embeddings
         metadata = {
             "text": chunk,
             "file_id": index_id,
