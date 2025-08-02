@@ -42,18 +42,16 @@ def clean_text(text: str, page_count: int) -> str:
     return text
 
 def split_into_sentences(text):
-    msg = []
-
+    # If it's a list, join with spaces
     if isinstance(text, list):
-        msg = [
-            "DEBUG - type:", str(type(text)),
-            "DEBUG - list content:", repr(text),
-            "DEBUG - joined with no space:", "".join(text),
-            "DEBUG - joined with space:", " ".join(text)
-        ]
         text = " ".join(text)
 
-    return sent_tokenize(text), msg
+    # Fix issue where every character is separated by a space
+    if re.fullmatch(r'(?:[A-Za-z]\s)+[A-Za-z]', text):
+        # Remove spaces between single characters
+        text = text.replace(" ", "")
+
+    return sent_tokenize(text)
 
 def create_chunks(sentences, min_words_no_chunk=340, max_chunk_words=500, overlap=50):
 
