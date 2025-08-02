@@ -180,7 +180,7 @@ def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int
     # 2. Construct the prompt for the Gemini model
     # The prompt structure is clear and works well with Gemini.
     prompt = f"""Answer clearly and concisely using only the information from the provided document, in one short paragraph.
-    If the answer is not found in the document, reply with "I don't know" and briefly explain why it might be missing.
+    in a way that you are a helpful assistant giving human like response.
 
     Context:
     {context}
