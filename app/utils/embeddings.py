@@ -100,7 +100,6 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
             model="text-embedding-004",
             contents=[question]
         )
-
         # Extract the embedding vector
         query_embedding = np.array(
             query_response.embeddings[0].values

@@ -27,13 +27,13 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     file_id = file_id_creation(text.lower())
 
     pinecone_index = get_pinecone_index()
-    has_embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
+    # has_embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
 
     embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
 
-    if not embeddings: 
-        chunks = prepare_for_embeddings(text, page)
-        embeddings = create_embeddings(chunks, file_id, pinecone_index)
+    #if not embeddings: 
+    chunks = prepare_for_embeddings(text, page)
+    embeddings = create_embeddings(chunks, file_id, pinecone_index)
 
     questions = request.questions
 
@@ -49,7 +49,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     except FileNotFoundError:
         pass
 
-    return answers_list
+    return embeddings, answers_list
 
 @app.post("/")
 def read_root():
