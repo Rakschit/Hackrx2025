@@ -97,6 +97,6 @@ def create_chunks(sentences, min_words_no_chunk=340, max_chunk_words=500, overla
 
 def prepare_for_embeddings(text, page):
     cleaned_text = clean_text(text, page)
-    sentences = split_into_sentences("".join(cleaned_text))
+    sentences = split_into_sentences("".join(cleaned_text)) # don't add space it will create space between every character
     chunks = create_chunks(sentences)
     return chunks

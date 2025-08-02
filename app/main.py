@@ -11,10 +11,6 @@ from app.models import RunRequest
 
 app = FastAPI()
 
-pc_key=os.getenv("PINECONE_API_KEY")
-    
-pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-
 def file_id_creation(text):
     text = " ".join(text.split())
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
@@ -37,8 +33,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     chunks = prepare_for_embeddings(text, page)   
     
     pinecone_index = get_pinecone_index()
-    embeddings = create_embeddings(chunks, file_id)
-    pinecone_index.upsert(vectors = embeddings)
+    embeddings = create_embeddings(chunks, file_id, pinecone_index)
 
     # Removing temporary file after processing
     try:
