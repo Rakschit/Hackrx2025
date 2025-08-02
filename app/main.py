@@ -18,7 +18,8 @@ def file_id_creation(text):
     return random_id
 
 @app.post("/hackrx/run")
-async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
+# async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
+async def run_query(request: RunRequest):
     timings = {}
 
     start = time.time()
