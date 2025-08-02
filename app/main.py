@@ -99,9 +99,7 @@ async def run_query(request: RunRequest):
     insert_hackrx_logs(file_id, doc_url, questions_json, answers_json, total_time_ms, timings_json)
 
     return {
-       "answers": answers_list,
-        "timings": timings,
-        "total_time_ms": total_time_ms
+       "answers": answers_list
     }
 
 @app.post("/")
