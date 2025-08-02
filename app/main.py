@@ -64,7 +64,7 @@ async def run_query(request: RunRequest):
     answers_list = []
     for q in questions:
         start_q = time.time()
-        answers_list.append(generate_answer_with_groq(q, embeddings, top_k=3))
+        answers_list.append(generate_answer_with_groq(q, top_matches_all))
         timings[f"generate_answer_with_groq_{q}"] = time.time() - start_q
 
     # Removing temporary file after processing

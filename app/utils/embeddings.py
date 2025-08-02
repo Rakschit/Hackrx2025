@@ -126,13 +126,10 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
     return results_all
 
 
-def generate_answer_with_groq(question: str, embeddings: list, top_k: int = 3):
-
-    # 1. Retrieve top matching chunks for the question
-    top_matches_all = search_relevant_chunks(question, embeddings, top_k)
+def generate_answer_with_groq(question: str, top_matches_all: dict, top_k: int = 3):
 
     # search_relevant_chunks returns a dict {question: [(score, {embedding, metadata})]}
-    top_matches = top_matches_all[question]
+    top_matches = top_matches_all[question][:top_k]
 
     # 2. Build context string from metadata["text"]
     context = "\n\n".join([
