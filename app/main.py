@@ -11,7 +11,7 @@ from app.utils.text_extraction import extract_text_from_pdf
 from app.utils.data_processing import prepare_for_embeddings
 from app.utils.embeddings import create_embeddings, get_pinecone_index, get_embeddings_from_namespace, search_relevant_chunks, generate_answer_with_groq, generate_answer_with_gemini
 from app.models import RunRequest
-from app.db import insert_hackrx_log
+from app.db import insert_hackrx_logs
 
 app = FastAPI()
 
@@ -88,7 +88,7 @@ async def run_query(request: RunRequest):
     answers_json = json.dumps(answers_list)
     timings_json = json.dumps(timings)
 
-    insert_hackrx_log(file_id, doc_url, questions_json, answers_json, total_time_ms, timings_json)
+    insert_hackrx_logs(file_id, doc_url, questions_json, answers_json, total_time_ms, timings_json)
 
     return {
        "answers": answers_list,
