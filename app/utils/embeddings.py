@@ -34,38 +34,31 @@ def check_storedEmbeddings(pinecone_index,id_to_check):
     return is_id_there.to_dict()
 """
 
-def create_embeddings(chunks, index_id):
+def create_embeddings(chunks, index_id, pinecone_index):
     gemini_key = os.getenv("GEMINI_API_KEY")
     client = genai.Client(api_key=gemini_key)
 
     response = client.models.embed_content(
         # text-embedding-004, gemini-embedding-001
-        model="text-embedding-004",  # Gemini embedding model
-        contents=chunks              # pass the whole list
+        model="gemini-embedding-001",  # Gemini embedding model
+        contents = chunks              # pass the whole list
     )
 
-    BATCH_SIZE = 100
     embeddings = []
-
-    for start in range(0, len(chunks), BATCH_SIZE):
-        batch = chunks[start:start + BATCH_SIZE]
-
-    response = client.models.batch_embed_contents(
-        model="text-embedding-004",
-        requests=[{"content": text} for text in batch]
-    )
-
     for i, emb in enumerate(response.embeddings):
         metadata = {
-            "text": batch[i],
+            "text": chunks[i],
             "file_id": index_id,
+            "chunk_id": f"{index_id}-{i}",
             "version": DATA_PROCESSING_VERSION
         }
+        
         embeddings.append((
-            f"{index_id}-{start+i}",
-            emb.values,
-            metadata
+            f"{index_id}-{i}",  
+            emb.values,         
+            metadata            
         ))
+
     return embeddings
 
 """
