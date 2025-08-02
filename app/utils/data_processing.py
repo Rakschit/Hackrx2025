@@ -92,8 +92,10 @@ def create_chunks(sentences, min_words_no_chunk=340, max_chunk_words=500, overla
 
     return chunks
 
+"""
 def prepare_for_embeddings(text, page):
     cleaned_text = clean_text(text, page)
     sentences = split_into_sentences(" ".join(cleaned_text))
     chunks = create_chunks(sentences)
     return chunks
+"""
