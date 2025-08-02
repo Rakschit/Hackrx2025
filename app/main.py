@@ -31,12 +31,18 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
     if request.method == "POST":
         body = await request.json()
         questions = body.get("questions", [])
-        doc_url, file_extension, temp_path = validate_request(body)
-
+        document = body.get("document", "")
     else:
-        q_param = request.query_params.get("questions", "")
-        questions = q_param.split(",") if q_param else []
-        doc_url, file_extension, temp_path = validate_request(request)
+        questions_param = request.query_params.get("questions", "")
+        questions = questions_param.split(",") if questions_param else []
+        document = request.query_params.get("document", "")
+
+    if not document:
+        return {"error": "document parameter is required"}
+
+    # Prepare a dict for validate_request
+    dummy_req = {"questions": questions, "document": document}
+    doc_url, file_extension, temp_path = validate_request(dummy_req)
 
     timings["validate_request"] = time.time() - start
 
