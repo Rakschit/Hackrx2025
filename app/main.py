@@ -32,7 +32,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     file_id = file_id_creation(text.lower())
 
     cleaned_text = clean_text(text, page)
-    sentences,msg = split_into_sentences(" ".join(cleaned_text))
+    sentences, msg = split_into_sentences(" ".join(cleaned_text))
 
     # if file_id is # inside the pinecone db then prepare chunks
     # has_embeddings(file_id)

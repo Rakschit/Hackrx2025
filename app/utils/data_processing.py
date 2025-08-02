@@ -42,15 +42,15 @@ def clean_text(text: str, page_count: int) -> str:
     return text
 
 def split_into_sentences(text):
+    msg = []
+
     if isinstance(text, list):
-        # Debug: print out the list and its structure
         msg = [
-            "DEBUG - type:", type(text),
+            "DEBUG - type:", str(type(text)),
             "DEBUG - list content:", repr(text),
             "DEBUG - joined with no space:", "".join(text),
             "DEBUG - joined with space:", " ".join(text)
         ]
-        # Use space-join to avoid squishing everything
         text = " ".join(text)
 
     return sent_tokenize(text), msg
