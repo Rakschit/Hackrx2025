@@ -8,6 +8,9 @@ DATA_PROCESSING_VERSION = "v1"
 pc_key=os.getenv("PINECONE_API_KEY")
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY")) 
 
+gemini_key = os.getenv("GEMINI_API_KEY")
+client = genai.Client(api_key=gemini_key)
+
 def get_pinecone_index():
     if index_name not in pc.list_indexes().names():
         pc.create_index(
@@ -30,9 +33,7 @@ def check_storedEmbeddings(pinecone_index,id_to_check):
 """
 
 def store_embeddings(chunks, index_id, pinecone_index):
-    from google import genai
-    gemini_key = os.getenv("GEMINI_API_KEY")
-    client = genai.Client(api_key=gemini_key)
+    
 
     embeddings = []
     for i, chunk in enumerate(chunks):
