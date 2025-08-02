@@ -9,7 +9,7 @@ from app.models import RunRequest
 
 BEARER_API_KEY = os.getenv("BEARER_API_KEY")
 
-def verify_bearer(authorization: Optional[str] = Header(...)):
+def verify_bearer(authorization: Optional[str] = Header(None)):
     if not BEARER_API_KEY:
         # raise HTTPException(status_code=500, detail="Server misconfiguration: BEARER_API_KEY not set")
         return None
