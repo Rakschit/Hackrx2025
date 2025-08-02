@@ -72,10 +72,9 @@ def store_embeddings(chunks, index_id, pinecone_index):
             "metadata": metadata
         })
     
-
     # Upload all embeddings to Pinecone
     pinecone_index.upsert(
-        vectors=embeddings,
+        vectors=vectors_to_upsert,
         namespace = f"{index_id}",
     )
 
