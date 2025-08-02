@@ -45,8 +45,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
         pass
 
     return {
-        "extension": file_extension,
-        "questions": request.questions,
+        "text": text,
         "page": page,
         "chunks length": len(chunks),
         "chunks:": chunks
