@@ -138,7 +138,10 @@ def generate_answer_with_groq(question: str, top_matches_all: dict, top_k: int =
 
     # 3. Construct prompt
     prompt = f"""Answer clearly and concisely using only the information from the provided document, in one short paragraph.
-        If the answer is not found in the document, reply with "I don't know" and briefly explain why it might be missing.
+    If there are minor typos or formatting errors in the document, correct them when forming the answer.
+    If the answer is not found in the document, reply with "I don't know" and briefly explain why it might be missing.
+    Do not use external knowledge and keep the response strictly based on the given text.
+
 
         Context:
         {context}
