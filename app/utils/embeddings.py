@@ -65,7 +65,7 @@ def store_embeddings(chunks, index_id, pinecone_index):
     # Upload all embeddings to Pinecone
     pinecone_index.upsert(
         vectors=embeddings,
-        namespace = f"index_id",
+        namespace = f"{index_id}",
     )
 
 def create_embeddings(chunks,index_id, pinecone_index):
@@ -114,7 +114,6 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
         results_all[question] = results
 
     return results_all
-
 
 
 def generate_answer_with_groq(question: str, embeddings: list, top_k: int = 3):
