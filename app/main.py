@@ -5,7 +5,8 @@ from pinecone import Pinecone
 
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
-from app.utils.data_processing import clean_text, split_into_sentences, prepare_for_embeddings
+from app.utils.data_processing import clean_text, split_into_sentences
+#prepare_for_embeddings
 from app.utils.embeddings import create_embeddings, get_pinecone_index
 from app.models import RunRequest
 
