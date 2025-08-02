@@ -38,12 +38,6 @@ def create_embeddings(chunks, index_id):
     gemini_key = os.getenv("GEMINI_API_KEY")
     client = genai.Client(api_key=gemini_key)
 
-    response = client.models.embed_content(
-        
-        model="gemini-embedding-001",  # Gemini embedding model
-        contents = chunks              # pass the whole list
-    )
-
     all_embeddings = []
     API_BATCH_SIZE = 0
     for i in range(0, len(chunks), API_BATCH_SIZE):
@@ -52,7 +46,7 @@ def create_embeddings(chunks, index_id):
 
         try:
             # Make the API call for the current batch
-            response = genai.embed_content(
+            response = client.embed_content(
                 model="models/embedding-001",  # Using the 'models/' prefix is good practice
                 content=request_batch,
                 task_type="RETRIEVAL_DOCUMENT"

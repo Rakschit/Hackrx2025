@@ -34,9 +34,9 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     # has_embeddings(file_id)
 
     chunks = prepare_for_embeddings(text, page)   
-    pinecone_index = get_pinecone_index()
-    embeddings = create_embeddings(chunks, file_id)
-    pinecone_index.upsert(emb=embeddings)
+    # pinecone_index = get_pinecone_index()
+    # embeddings = create_embeddings(chunks, file_id)
+    # pinecone_index.upsert(emb=embeddings)
 
     # Removing temporary file after processing
     try:
@@ -48,7 +48,8 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
         "extension": file_extension,
         "questions": request.questions,
         "page": page,
-        "chunks length": len(chunks)
+        "chunks length": len(chunks),
+        "chunks:": chunks
     }
 
 @app.post("/")
