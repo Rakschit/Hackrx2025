@@ -1,5 +1,6 @@
 import os
 from fastapi import Header, HTTPException
+from typing import Optional
 import requests
 from mimetypes import guess_type
 
@@ -8,11 +9,10 @@ from app.models import RunRequest
 
 BEARER_API_KEY = os.getenv("BEARER_API_KEY")
 
-def verify_bearer(authorization: str = Header(...)):
-    """
+def verify_bearer(authorization: Optional[str] = Header(...)):
     if not BEARER_API_KEY:
-        raise HTTPException(status_code=500, detail="Server misconfiguration: BEARER_API_KEY not set")
-    """
+        # raise HTTPException(status_code=500, detail="Server misconfiguration: BEARER_API_KEY not set")
+        return None
     if authorization != f"{BEARER_API_KEY}":
         raise HTTPException(status_code=401, detail="Unauthorized")
 
