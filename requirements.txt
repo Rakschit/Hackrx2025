@@ -6,8 +6,8 @@ nltk
 pydantic
 requests
 pinecone
-google-genai
 numpy
 scikit-learn
 groq
 google-generativeai
+psycopg2-binary

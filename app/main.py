@@ -4,12 +4,14 @@ import hashlib
 from pinecone import Pinecone
 import uuid
 import time
+import json
 
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
 from app.utils.data_processing import prepare_for_embeddings
 from app.utils.embeddings import create_embeddings, get_pinecone_index, get_embeddings_from_namespace, search_relevant_chunks, generate_answer_with_groq, generate_answer_with_gemini
 from app.models import RunRequest
+from app.db import insert_qa_log
 
 app = FastAPI()
 
@@ -20,10 +22,11 @@ def file_id_creation(text):
 @app.post("/hackrx/run")
 # async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
 async def run_query(request: RunRequest):
+    request_start = time.time()
     timings = {}
 
     start = time.time()
-    file_extension, temp_path = validate_request(request)
+    doc_url, file_extension, temp_path = validate_request(request)
     timings["validate_request"] = time.time() - start
 
     # Extract text
@@ -77,9 +80,20 @@ async def run_query(request: RunRequest):
     except FileNotFoundError:
         pass
 
+    # ---- DATABASE INSERTION ----
+    total_time = time.time() - request_start
+    total_time_ms = int(total_time * 1000)
+
+    questions_json = json.dumps(questions)
+    answers_json = json.dumps(answers_list)
+    timings_json = json.dumps(timings)
+
+    insert_qa_log(file_id, doc_url, questions_json, answers_json, total_time_ms, timings_json)
+
     return {
        "answers": answers_list,
-        "timings": timings
+        "timings": timings,
+        "total_time_ms": total_time_ms
     }
 
 @app.post("/")

@@ -57,7 +57,7 @@ def validate_request(request: RunRequest):
     
     download_file(doc_url, temp_path) # DOWNLOAD FILE AFTER VALIDATING
 
-    return file_extension, temp_path
+    return doc_url, file_extension, temp_path
 
 
 def download_file(doc_url, temp_path):
