@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends
 import os, shutil
 import hashlib
 from pinecone import Pinecone
+import uuid
 
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
@@ -12,8 +13,8 @@ from app.models import RunRequest
 app = FastAPI()
 
 def file_id_creation(text):
-    text = " ".join(text.split())
-    return hashlib.sha256(text.encode('utf-8')).hexdigest()
+    random_id = str(uuid.uuid4())
+    return random_id
 
 @app.post("/hackrx/run")
 async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
