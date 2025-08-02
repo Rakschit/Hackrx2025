@@ -66,13 +66,13 @@ def store_embeddings(chunks, index_id, pinecone_index):
             metadata
         ))
     
-    return embeddings
 
     # Upload all embeddings to Pinecone
     pinecone_index.upsert(
         vectors=embeddings,
         namespace = f"{index_id}",
     )
+    return embeddings
 
 def create_embeddings(chunks,index_id, pinecone_index):
     embeddings = store_embeddings(chunks, index_id, pinecone_index)
