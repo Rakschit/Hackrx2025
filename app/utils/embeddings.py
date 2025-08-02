@@ -52,7 +52,8 @@ def store_embeddings(chunks, index_id, pinecone_index):
         model="text-embedding-004",
         contents = chunks  # pass the entire list
     )
-
+    
+    vectors_to_upsert = []
     embeddings = []
     for i, emb in enumerate(response.embeddings):
         metadata = {
@@ -60,11 +61,16 @@ def store_embeddings(chunks, index_id, pinecone_index):
             "version": DATA_PROCESSING_VERSION
         }
 
-        embeddings.append((
-            f"{index_id}-{i}",     # unique ID
-            emb.values,     # embedding vector from list
+        vectors_to_upsert.append((
+            f"{index_id}-{i}",
+            emb.values,
             metadata
         ))
+
+        embeddings.append({
+            "embedding": emb.values,     
+            "metadata": metadata
+        })
     
 
     # Upload all embeddings to Pinecone
@@ -72,11 +78,11 @@ def store_embeddings(chunks, index_id, pinecone_index):
         vectors=embeddings,
         namespace = f"{index_id}",
     )
-    return embeddings
 
 def create_embeddings(chunks,index_id, pinecone_index):
-    embeddings = store_embeddings(chunks, index_id, pinecone_index)
-    return embeddings
+    store_embeddings(chunks, index_id, pinecone_index)
+
+    return 
 
 
 def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
