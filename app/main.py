@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends
 import os, shutil
 import hashlib
+from pinecone import Pinecone
 
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
@@ -9,6 +10,10 @@ from app.utils.embeddings import create_embeddings, get_pinecone_index
 from app.models import RunRequest
 
 app = FastAPI()
+
+pc_key=os.getenv("PINECONE_API_KEY")
+    
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 
 def file_id_creation(text):
     text = " ".join(text.split())
@@ -30,7 +35,8 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
 
     chunks = prepare_for_embeddings(text, page)   
     pinecone_index = get_pinecone_index()
-    msg = create_embeddings(chunks, file_id, pinecone_index)
+    embeddings = create_embeddings(chunks, file_id, pinecone_index)
+    pinecone_index.upsert(emb=embeddings)
 
     # Removing temporary file after processing
     try:

@@ -49,7 +49,6 @@ def create_embeddings(chunks, index_id, pinecone_index):
         metadata = {
             "text": chunks[i],
             "file_id": index_id,
-            "chunk_id": f"{index_id}-{i}",
             "version": DATA_PROCESSING_VERSION
         }
         
@@ -68,7 +67,6 @@ def create_embeddings(chunks, index_id, pinecone_index):
             "text": chunks[i],
             "file_id": index_id
         })
-    pinecone_index.upsert(emb=embeddings)
 
     return "embeddings upserted"
 
