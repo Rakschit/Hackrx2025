@@ -21,7 +21,7 @@ def file_id_creation(text):
 
 #@app.post("/hackrx/run")
 
-@app.add_api_route("/hackrx/run", methods=["GET","POST"])
+@app.api_route("/hackrx/run", methods=["GET","POST"])
 async def run_query(request: Request, _: None = Depends(verify_bearer)):
     request_start = time.time()
     timings = {}
@@ -37,7 +37,7 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         q_param = request.query_params.get("questions", "")
         questions = q_param.split(",") if q_param else []
         doc_url, file_extension, temp_path = validate_request(request)
-        
+
     timings["validate_request"] = time.time() - start
 
     # Extract text
