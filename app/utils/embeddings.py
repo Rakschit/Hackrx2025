@@ -77,11 +77,11 @@ def store_embeddings(chunks, index_id, pinecone_index):
         vectors=vectors_to_upsert,
         namespace = f"{index_id}",
     )
+    return embeddings
 
 def create_embeddings(chunks,index_id, pinecone_index):
-    store_embeddings(chunks, index_id, pinecone_index)
-
-    return 
+    embeddings = store_embeddings(chunks, index_id, pinecone_index)
+    return embeddings
 
 
 def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
