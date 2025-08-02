@@ -64,15 +64,23 @@ async def run_query(request: RunRequest):
     start = time.time()
     top_matches_all = search_relevant_chunks(questions, embeddings)
     timings["search_relevant_chunks"] = time.time() - start
-    
+
     answers_list = []
+    """
     for q in questions:
+        start_q = time.time()
+        
+        answers_list.append(generate_answer_with_gemini(q, top_matches_all))
+        timings[f"generate_answer_with_llm_{q}"] = time.time() - start_q
+    """
+    for i, q in enumerate(questions, start=1):
         start_q = time.time()
         # use groq when testing
         # answers_list.append(generate_answer_with_groq(q, top_matches_all))
         # use gemini when uploading
         answers_list.append(generate_answer_with_gemini(q, top_matches_all))
-        timings[f"generate_answer_with_llm_{q}"] = time.time() - start_q
+        timings[f"generate_answer_with_llm_{i}"] = round(time.time() - start_q, 2)
+
 
     # Removing temporary file after processing
     try:
