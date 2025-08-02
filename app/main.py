@@ -41,11 +41,11 @@ async def run_query(request: RunRequest):
     timings["get_pinecone_index"] = time.time() - start
 
     # Fetch embeddings
-    """
+
     start = time.time()
     embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
     timings["get_embeddings_from_namespace"] = time.time() - start
-    """
+
     # If no embeddings, prepare and create
     if not embeddings:
         start = time.time()
