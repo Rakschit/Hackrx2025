@@ -10,3 +10,4 @@ google-genai
 numpy
 scikit-learn
 groq
+google-generativeai

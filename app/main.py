@@ -8,7 +8,7 @@ import time
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
 from app.utils.data_processing import prepare_for_embeddings
-from app.utils.embeddings import create_embeddings, get_pinecone_index, get_embeddings_from_namespace, search_relevant_chunks, generate_answer_with_groq
+from app.utils.embeddings import create_embeddings, get_pinecone_index, get_embeddings_from_namespace, search_relevant_chunks, generate_answer_with_groq, generate_answer_with_gemini
 from app.models import RunRequest
 
 app = FastAPI()
@@ -64,8 +64,11 @@ async def run_query(request: RunRequest):
     answers_list = []
     for q in questions:
         start_q = time.time()
-        answers_list.append(generate_answer_with_groq(q, top_matches_all))
-        timings[f"generate_answer_with_groq_{q}"] = time.time() - start_q
+        # use groq when testing
+        # answers_list.append(generate_answer_with_groq(q, top_matches_all))
+        # use gemini when uploading
+        answers_list.append(generate_answer_with_gemini(q, top_matches_all))
+        timings[f"generate_answer_with_llm_{q}"] = time.time() - start_q
 
     # Removing temporary file after processing
     try:

@@ -1,9 +1,10 @@
 from pinecone import Pinecone, ServerlessSpec
-from google import genai
 import os
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from groq import Groq
+from google import genai
+import google.generativeai as genai
 
 index_name = "hackrxindex"
 DATA_PROCESSING_VERSION = "v1"
@@ -83,7 +84,6 @@ def create_embeddings(chunks,index_id, pinecone_index):
     embeddings = store_embeddings(chunks, index_id, pinecone_index)
     return embeddings
 
-
 def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
     """
     Given one or more questions and pre-computed embeddings,
@@ -125,7 +125,6 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
 
     return results_all
 
-
 def generate_answer_with_groq(question: str, top_matches_all: dict, top_k: int = 3):
 
     # search_relevant_chunks returns a dict {question: [(score, {embedding, metadata})]}
@@ -161,3 +160,37 @@ def generate_answer_with_groq(question: str, top_matches_all: dict, top_k: int =
 
     # 5. Return the answer text
     return chat_completion.choices[0].message.content.strip()
+
+def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int = 3):
+    
+    # 1. Select the top k matching text snippets for context
+    # This part of the logic remains the same.
+    if question not in top_matches_all or not top_matches_all[question]:
+        return "I don't have any context to answer this question."
+
+    top_matches = top_matches_all[question][:top_k]
+
+    context = "\n\n".join([
+        match_item["metadata"]["text"] for _, match_item in top_matches
+    ])
+
+    # 2. Construct the prompt for the Gemini model
+    # The prompt structure is clear and works well with Gemini.
+    prompt = f"""Answer clearly and concisely using only the information from the provided document, in one short paragraph.
+    If the answer is not found in the document, reply with "I don't know" and briefly explain why it might be missing.
+
+    Context:
+    {context}
+
+    Question:
+    {question}
+    """
+
+    # 3. Initialize the Gemini model
+    model = genai.GenerativeModel("gemini-2.5-flash-lite")
+
+    # 4. Generate the content using the Gemini API
+    response = model.generate_content(prompt)
+
+    # 5. Return the cleaned-up response text
+    return response.text.strip()
