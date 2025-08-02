@@ -50,9 +50,6 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
         pass
 
     return {
-        "text": text,
-        "page": page,
-        "clean_text": cleaned_text,
         "sentence": sentences
     }
 
