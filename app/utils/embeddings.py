@@ -35,28 +35,30 @@ def check_storedEmbeddings(pinecone_index,id_to_check):
 def store_embeddings(chunks, index_id, pinecone_index):
     
 
-    embeddings = []
-    for i, chunk in enumerate(chunks):
-        # Generate embedding for each chunk
-        response = client.models.embed_content(
-            model = "gemini-embedding-001",
-            contents = chunk
-        )
+    # Generate all embeddings in one request (contents = list of strings)
+    response = client.models.embed_content(
+        model="gemini-embedding-001",
+        contents = chunks  # pass the entire list
+    )
 
-        emb = response.embeddings
+    embeddings = []
+    for i, emb in enumerate(response.embeddings):
         metadata = {
-            "text": chunk,
+            "text": chunks[i],
             "file_id": index_id,
+            "chunk_id": f"pdf-{i}",
             "version": DATA_PROCESSING_VERSION
         }
 
         embeddings.append((
-            f"{index_id}-{i}",
-            emb.values,
+            f"pdf-{i}",     # unique ID
+            emb.values,     # embedding vector from list
             metadata
         ))
 
+    # Upload all embeddings to Pinecone
     pinecone_index.upsert(vectors=embeddings)
+
 
 
 def create_embeddings(chunks,index_id, pinecone_index):
