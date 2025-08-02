@@ -21,12 +21,15 @@ allowed_types = {
     "message/rfc822": "eml",
 }
 
-def validate_request(request: RunRequest):
+def validate_request(request):
     # VALIDATING QUESTION
-    if not request.questions or not all(isinstance(q, str) for q in request.questions):
+    questions = request.questions if hasattr(request, "questions") else request.get("questions")
+    document = request.document if hasattr(request, "document") else request.get("document")
+
+    if not questions or not all(isinstance(q, str) for q in questions):
         raise HTTPException(status_code=400, detail="Questions must be a list of strings")
-    
-    doc_url = str(request.document)
+
+    doc_url = str(document)
 
     resp = requests.head(doc_url, stream=True, allow_redirects=True)
     doc_type = resp.headers.get("Content-Type", "").lower().split(";")[0].strip()
