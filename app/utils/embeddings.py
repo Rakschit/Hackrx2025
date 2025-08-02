@@ -121,27 +121,30 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
 
 
 def generate_answer_with_groq(question: str, embeddings: list, top_k: int = 3):
-    """
-    Generate a concise answer for a single question using Groq's model,
-    based on top_k relevant document chunks.
-    """
-    top_matches = search_relevant_chunks(question, embeddings, top_k)
 
-    # Extract context text from metadata
+    # 1. Retrieve top matching chunks for the question
+    top_matches_all = search_relevant_chunks(question, embeddings, top_k)
+
+    # search_relevant_chunks returns a dict {question: [(score, {embedding, metadata})]}
+    top_matches = top_matches_all[question]
+
+    # 2. Build context string from metadata["text"]
     context = "\n\n".join([
         match_item["metadata"]["text"] for _, match_item in top_matches
     ])
 
+    # 3. Construct prompt
     prompt = f"""Answer clearly and concisely using only the information from the provided document, in one short paragraph.
-    If the answer is not found in the document, reply with "I don't know" and briefly explain why it might be missing.
+        If the answer is not found in the document, reply with "I don't know" and briefly explain why it might be missing.
 
-    Context:
-    {context}
+        Context:
+        {context}
 
-    Question:
-    {question}
+        Question:
+        {question}
     """
 
+    # 4. Call Groq's chat completion
     chat_completion = groq_client.chat.completions.create(
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
@@ -150,4 +153,5 @@ def generate_answer_with_groq(question: str, embeddings: list, top_k: int = 3):
         model="gemma2-9b-it",
     )
 
+    # 5. Return the answer text
     return chat_completion.choices[0].message.content.strip()
