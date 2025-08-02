@@ -6,3 +6,4 @@ nltk
 pydantic
 requests
 pinecone
+google-genai
