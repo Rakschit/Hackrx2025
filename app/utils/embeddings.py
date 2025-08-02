@@ -27,7 +27,7 @@ def get_pinecone_index():
     return pc.Index(index_name)
 
 def get_embeddings_from_namespace(pinecone_index, id_to_check, top_k: int = 1000):
-    dummy_vector = [0] * 3072  # Adjust dimension
+    dummy_vector = [0] * 768  # Adjust dimension
     result = pinecone_index.query(
         vector=dummy_vector,
         top_k=top_k,
@@ -49,7 +49,7 @@ def store_embeddings(chunks, index_id, pinecone_index):
     
     # Generate all embeddings in one request (contents = list of strings)
     response = client.models.embed_content(
-        model="gemini-embedding-001",
+        model="text-embedding-004",
         contents = chunks  # pass the entire list
     )
 
