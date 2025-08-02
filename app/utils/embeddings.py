@@ -120,21 +120,20 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
     return results_all
 
 
-def generate_answer_with_groq(question: str, embeddings: list, top_k: int = 3):
+def generate_answer_with_groq(questions, embeddings: list, top_k: int = 3):
+    # Retrieve matches
+    top_matches_all = search_relevant_chunks(questions, embeddings, top_k)
 
-    # 1. Retrieve top matching chunks for the question
-    top_matches_all = search_relevant_chunks(question, embeddings, top_k)
+    results = {}
 
-    # search_relevant_chunks returns a dict {question: [(score, {embedding, metadata})]}
-    top_matches = top_matches_all[question]
+    for question in (questions if isinstance(questions, list) else [questions]):
+        top_matches = top_matches_all[question]
 
-    # 2. Build context string from metadata["text"]
-    context = "\n\n".join([
-        match_item["metadata"]["text"] for _, match_item in top_matches
-    ])
+        context = "\n\n".join([
+            match_item["metadata"]["text"] for _, match_item in top_matches
+        ])
 
-    # 3. Construct prompt
-    prompt = f"""Answer clearly and concisely using only the information from the provided document, in one short paragraph.
+        prompt = f"""Answer clearly and concisely using only the information from the provided document, in one short paragraph.
         If the answer is not found in the document, reply with "I don't know" and briefly explain why it might be missing.
 
         Context:
@@ -142,16 +141,16 @@ def generate_answer_with_groq(question: str, embeddings: list, top_k: int = 3):
 
         Question:
         {question}
-    """
+        """
 
-    # 4. Call Groq's chat completion
-    chat_completion = groq_client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        model="gemma2-9b-it",
-    )
+        chat_completion = groq_client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            model="gemma2-9b-it",
+        )
 
-    # 5. Return the answer text
-    return chat_completion.choices[0].message.content.strip()
+        results[question] = chat_completion.choices[0].message.content.strip()
+
+    return results
