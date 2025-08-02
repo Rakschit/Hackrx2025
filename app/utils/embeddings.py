@@ -3,7 +3,7 @@ import os
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from groq import Groq
-from google import genai
+# from google import genai
 import google.generativeai as genai
 
 index_name = "hackrxindex"
@@ -12,8 +12,8 @@ DATA_PROCESSING_VERSION = "v1"
 pc_key=os.getenv("PINECONE_API_KEY")
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY")) 
 
-gemini_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=gemini_key)
+gemini_api_key = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=gemini_api_key)
 
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
@@ -46,17 +46,20 @@ def get_embeddings_from_namespace(pinecone_index, id_to_check, top_k: int = 1000
 
     return embeddings
 
-def store_embeddings(chunks, index_id, pinecone_index):
-    
-    # Generate all embeddings in one request (contents = list of strings)
-    response = client.models.embed_content(
-        model="text-embedding-004",
-        contents = chunks  # pass the entire list
+
+def store_embeddings(chunks: list, index_id: str, pinecone_index):
+    response = genai.embed_content(
+        model="models/text-embedding-004",
+        content=chunks,  
+        task_type="RETRIEVAL_DOCUMENT" 
     )
-    
+
+    embeddings_list = response['embedding']
+
     vectors_to_upsert = []
-    embeddings = []
-    for i, emb in enumerate(response.embeddings):
+    processed_embeddings = []
+
+    for i, emb_vector in enumerate(embeddings_list):
         metadata = {
             "text": chunks[i],
             "version": DATA_PROCESSING_VERSION
@@ -64,21 +67,21 @@ def store_embeddings(chunks, index_id, pinecone_index):
 
         vectors_to_upsert.append((
             f"{index_id}-{i}",
-            emb.values,
+            emb_vector, 
             metadata
         ))
 
-        embeddings.append({
-            "embedding": emb.values,     
+        # For the return value
+        processed_embeddings.append({
+            "embedding": emb_vector, 
             "metadata": metadata
         })
-    
-    # Upload all embeddings to Pinecone
+
     pinecone_index.upsert(
         vectors=vectors_to_upsert,
-        namespace = f"{index_id}",
+        namespace=index_id
     )
-    return embeddings
+    return processed_embeddings
 
 def create_embeddings(chunks,index_id, pinecone_index):
     embeddings = store_embeddings(chunks, index_id, pinecone_index)
@@ -160,6 +163,11 @@ def generate_answer_with_groq(question: str, top_matches_all: dict, top_k: int =
 
     # 5. Return the answer text
     return chat_completion.choices[0].message.content.strip()
+
+
+
+import google.generativeai as genai
+genai.configure(api_key = os.getenv("GEMINI_API_KEY"))
 
 def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int = 3):
     

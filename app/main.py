@@ -41,26 +41,27 @@ async def run_query(request: RunRequest):
     timings["get_pinecone_index"] = time.time() - start
 
     # Fetch embeddings
+    """
     start = time.time()
     embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
     timings["get_embeddings_from_namespace"] = time.time() - start
-
+    """
     # If no embeddings, prepare and create
     if not embeddings:
         start = time.time()
         chunks = prepare_for_embeddings(text, page)
         timings["prepare_for_embeddings"] = time.time() - start
-
+        
         start = time.time()
         embeddings = create_embeddings(chunks, file_id, pinecone_index)
         timings["create_embeddings"] = time.time() - start
 
     questions = request.questions
-
+    """
     start = time.time()
     top_matches_all = search_relevant_chunks(questions, embeddings)
     timings["search_relevant_chunks"] = time.time() - start
-
+    
     answers_list = []
     for q in questions:
         start_q = time.time()
@@ -69,7 +70,7 @@ async def run_query(request: RunRequest):
         # use gemini when uploading
         answers_list.append(generate_answer_with_gemini(q, top_matches_all))
         timings[f"generate_answer_with_llm_{q}"] = time.time() - start_q
-
+    """
     # Removing temporary file after processing
     try:
         os.remove(temp_path)
@@ -77,7 +78,8 @@ async def run_query(request: RunRequest):
         pass
 
     return {
-        "answers": answers_list,
+       # "answers": answers_list,
+       "embeddings": embeddings,
         "timings": timings
     }
 
