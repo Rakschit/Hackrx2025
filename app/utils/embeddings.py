@@ -46,7 +46,6 @@ def get_embeddings_from_namespace(pinecone_index, id_to_check, top_k: int = 1000
 
     return embeddings
 
-
 def store_embeddings(chunks: list, index_id: str, pinecone_index):
     response = genai.embed_content(
         model="models/text-embedding-004",
@@ -164,7 +163,6 @@ def generate_answer_with_groq(question: str, top_matches_all: dict, top_k: int =
 
     # 5. Return the answer text
     return chat_completion.choices[0].message.content.strip()
-
 
 def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int = 3):
     
