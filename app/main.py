@@ -33,7 +33,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     chunks = prepare_for_embeddings(text, page)   
     
     pinecone_index = get_pinecone_index()
-    #create_embeddings(chunks, file_id, pinecone_index)
+    create_embeddings(chunks, file_id, pinecone_index)
 
     # Removing temporary file after processing
     try:
