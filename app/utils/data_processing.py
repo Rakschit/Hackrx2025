@@ -45,12 +45,6 @@ def split_into_sentences(text):
     # If it's a list, join with spaces
     if isinstance(text, list):
         text = " ".join(text)
-
-    # Fix issue where every character is separated by a space
-    if re.fullmatch(r'(?:[A-Za-z]\s)+[A-Za-z]', text):
-        # Remove spaces between single characters
-        text = text.replace(" ", "")
-
     return sent_tokenize(text)
 
 def create_chunks(sentences, min_words_no_chunk=340, max_chunk_words=500, overlap=50):
@@ -100,10 +94,9 @@ def create_chunks(sentences, min_words_no_chunk=340, max_chunk_words=500, overla
 
     return chunks
 
-"""
+
 def prepare_for_embeddings(text, page):
     cleaned_text = clean_text(text, page)
-    sentences = split_into_sentences(" ".join(cleaned_text))
+    sentences = split_into_sentences("".join(cleaned_text))
     chunks = create_chunks(sentences)
     return chunks
-"""

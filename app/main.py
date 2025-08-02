@@ -5,8 +5,7 @@ from pinecone import Pinecone
 
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
-from app.utils.data_processing import clean_text, split_into_sentences
-#prepare_for_embeddings
+from app.utils.data_processing import prepare_for_embeddings
 from app.utils.embeddings import create_embeddings, get_pinecone_index
 from app.models import RunRequest
 
@@ -31,17 +30,15 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
 
     file_id = file_id_creation(text.lower())
 
-    cleaned_text = clean_text(text, page)
-    sentences= split_into_sentences("".join(cleaned_text))
 
     # if file_id is # inside the pinecone db then prepare chunks
     # has_embeddings(file_id)
 
-    #chunks = prepare_for_embeddings(text, page)   
+    chunks = prepare_for_embeddings(text, page)   
     
-    # pinecone_index = get_pinecone_index()
-    # embeddings = create_embeddings(chunks, file_id)
-    # pinecone_index.upsert(emb=embeddings)
+    pinecone_index = get_pinecone_index()
+    embeddings = create_embeddings(chunks, file_id)
+    pinecone_index.upsert(emb=embeddings)
 
     # Removing temporary file after processing
     try:
@@ -50,7 +47,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
         pass
 
     return {
-        "sentence": sentences
+        "chunks lenght": len(chunks) 
     }
 
 @app.post("/")
