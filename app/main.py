@@ -3,6 +3,7 @@ import os, shutil
 import hashlib
 from pinecone import Pinecone
 import uuid
+import time
 
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
@@ -18,31 +19,52 @@ def file_id_creation(text):
 
 @app.post("/hackrx/run")
 async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
-    
+    timings = {}
+
+    start = time.time()
     file_extension, temp_path = validate_request(request)
+    timings["validate_request"] = time.time() - start
+
     # Extract text
+    start = time.time()
     if file_extension == "pdf":
-        text,page = extract_text_from_pdf(temp_path)
+        text, page = extract_text_from_pdf(temp_path)
+    timings["extract_text"] = time.time() - start
 
+    start = time.time()
     file_id = file_id_creation(text.lower())
+    timings["file_id_creation"] = time.time() - start
 
+    start = time.time()
     pinecone_index = get_pinecone_index()
-    # has_embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
+    timings["get_pinecone_index"] = time.time() - start
 
+    # Fetch embeddings
+    start = time.time()
     embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
+    timings["get_embeddings_from_namespace"] = time.time() - start
 
-    # If caching later after proper data processing
-    if not embeddings: 
+    # If no embeddings, prepare and create
+    if not embeddings:
+        start = time.time()
         chunks = prepare_for_embeddings(text, page)
+        timings["prepare_for_embeddings"] = time.time() - start
+
+        start = time.time()
         embeddings = create_embeddings(chunks, file_id, pinecone_index)
+        timings["create_embeddings"] = time.time() - start
 
     questions = request.questions
 
+    start = time.time()
     top_matches_all = search_relevant_chunks(questions, embeddings)
-    answers_list = [
-        generate_answer_with_groq(q, embeddings, top_k=3)
-        for q in questions
-    ]
+    timings["search_relevant_chunks"] = time.time() - start
+
+    answers_list = []
+    for q in questions:
+        start_q = time.time()
+        answers_list.append(generate_answer_with_groq(q, embeddings, top_k=3))
+        timings[f"generate_answer_with_groq_{q}"] = time.time() - start_q
 
     # Removing temporary file after processing
     try:
@@ -50,7 +72,10 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     except FileNotFoundError:
         pass
 
-    return answers_list
+    return {
+        "answers": answers_list,
+        "timings": timings
+    }
 
 @app.post("/")
 def read_root():
