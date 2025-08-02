@@ -7,3 +7,6 @@ pydantic
 requests
 pinecone
 google-genai
+numpy
+scikit-learn
+groq
