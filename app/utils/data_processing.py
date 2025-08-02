@@ -45,67 +45,50 @@ def split_into_sentences(text):
     new_text = sent_tokenize(text)
     return new_text
 
-def create_chunks(sentences, max_chunk_words=500, overlap_sentences=2):
-    """
-    Creates semantically meaningful chunks from a list of sentences.
+def create_chunks(sentences, min_words_no_chunk=340, max_chunk_words=500, overlap=50):
 
-    Args:
-        sentences (list[str]): A list of sentences from the document.
-        max_chunk_words (int): The target maximum number of words for a chunk.
-        overlap_sentences (int): How many sentences to include as overlap between chunks.
+    # Count total words
+    total_words = sum(len(s.split()) for s in sentences)
 
-    Returns:
-        list[str]: A list of text chunks.
-    """
-    if not sentences:
-        return []
-
-    # Pre-calculate the word count for each sentence
-    sentence_word_counts = [len(s.split()) for s in sentences]
-    total_words = sum(sentence_word_counts)
-
-    # If the document is small, return it as a single chunk
-    if total_words <= max_chunk_words:
+    # If document is small, don't chunk
+    if total_words <= min_words_no_chunk:
         return [" ".join(sentences)]
 
+    # Determine chunk size
+    if 700 <= total_words <= 1000:
+        target_chunks = 3
+        chunk_size = max(min(total_words // target_chunks, max_chunk_words), 250)
+    else:
+        chunk_size = max_chunk_words
+
     chunks = []
-    current_chunk_sentences = []
-    current_chunk_words = 0
-    
-    for i, sentence in enumerate(sentences):
-        sentence_len = sentence_word_counts[i]
+    current_chunk = []
+    current_len = 0
 
-        # If adding the next sentence would exceed the max size, finalize the current chunk
-        if current_chunk_words + sentence_len > max_chunk_words and current_chunk_sentences:
-            chunks.append(" ".join(current_chunk_sentences))
+    for sent in sentences:
+        words = sent.split()
+        # If adding this sentence exceeds the chunk size
+        if current_len + len(words) > chunk_size:
+            chunks.append(" ".join(current_chunk))
 
-            # Start the next chunk with an overlap
-            # A deque is efficient for this, but a simple slice works well too
-            overlap_start_index = max(0, len(current_chunk_sentences) - overlap_sentences)
-            current_chunk_sentences = current_chunk_sentences[overlap_start_index:]
-            
-            # Recalculate the word count for the new, overlapped chunk
-            current_chunk_words = sum(len(s.split()) for s in current_chunk_sentences)
+            # Create overlap
+            if overlap > 0:
+                overlap_words = " ".join(
+                    " ".join(current_chunk).split()[-overlap:]
+                )
+                current_chunk = [overlap_words]
+                current_len = len(overlap_words.split())
+            else:
+                current_chunk = []
+                current_len = 0
 
-        # If a single sentence is larger than the max chunk size, handle it
-        if sentence_len > max_chunk_words:
-            # If there's a pending chunk, save it first
-            if current_chunk_sentences:
-                chunks.append(" ".join(current_chunk_sentences))
-                current_chunk_sentences = []
-                current_chunk_words = 0
-            
-            # Add the huge sentence as its own chunk
-            chunks.append(sentence)
-            continue # Move to the next sentence
+        # Add sentence to chunk
+        current_chunk.append(sent)
+        current_len += len(words)
 
-        # Add the current sentence to the chunk
-        current_chunk_sentences.append(sentence)
-        current_chunk_words += sentence_len
-
-    # Add the final chunk if any sentences are left
-    if current_chunk_sentences:
-        chunks.append(" ".join(current_chunk_sentences))
+    # Add final chunk
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
 
     return chunks
 
