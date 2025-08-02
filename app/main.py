@@ -6,7 +6,7 @@ from pinecone import Pinecone
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
 from app.utils.data_processing import prepare_for_embeddings
-from app.utils.embeddings import create_embeddings, get_pinecone_index
+from app.utils.embeddings import create_embeddings, get_pinecone_index, get_embeddings_from_namespace, search_relevant_chunks, generate_answer_with_groq
 from app.models import RunRequest
 
 app = FastAPI()
@@ -19,21 +19,30 @@ def file_id_creation(text):
 async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     
     file_extension, temp_path = validate_request(request)
-
     # Extract text
     if file_extension == "pdf":
         text,page = extract_text_from_pdf(temp_path)
 
     file_id = file_id_creation(text.lower())
 
-
-    # if file_id is # inside the pinecone db then prepare chunks
-    # has_embeddings(file_id)
-
-    chunks = prepare_for_embeddings(text, page)   
-    
     pinecone_index = get_pinecone_index()
-    create_embeddings(chunks, file_id, pinecone_index)
+    has_embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
+
+    if has_embeddings:
+        embeddings = [
+        {"embedding": match["values"], "metadata": match["metadata"]}
+        for match in has_embeddings
+    ]
+    else:
+        chunks = prepare_for_embeddings(text, page)
+        embeddings = create_embeddings(chunks, file_id, pinecone_index)
+
+
+    questions = request.questions
+    top_matches_all = search_relevant_chunks(questions, embeddings)
+    answer = generate_answer_with_groq(questions, embeddings)
+
+
 
     # Removing temporary file after processing
     try:
@@ -41,9 +50,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     except FileNotFoundError:
         pass
 
-    return {
-        "chunks length": len(chunks)
-    }
+    return answer
 
 @app.post("/")
 def read_root():
