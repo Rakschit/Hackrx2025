@@ -39,8 +39,8 @@ def store_embeddings(chunks, index_id, pinecone_index):
     for i, chunk in enumerate(chunks):
         # Generate embedding for each chunk
         response = client.models.embed_content(
-            model="gemini-embedding-001",
-            content=chunk
+            model = "gemini-embedding-001",
+            contents = chunk
         )
 
         emb = response.embedding
