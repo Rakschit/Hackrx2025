@@ -43,8 +43,17 @@ def clean_text(text: str, page_count: int) -> str:
 
 def split_into_sentences(text):
     if isinstance(text, list):
-        text = "".join(text)
-    return sent_tokenize(text)
+        # Debug: print out the list and its structure
+        msg = [
+            "DEBUG - type:", type(text),
+            "DEBUG - list content:", repr(text),
+            "DEBUG - joined with no space:", "".join(text),
+            "DEBUG - joined with space:", " ".join(text)
+        ]
+        # Use space-join to avoid squishing everything
+        text = " ".join(text)
+
+    return sent_tokenize(text), msg
 
 def create_chunks(sentences, min_words_no_chunk=340, max_chunk_words=500, overlap=50):
 
