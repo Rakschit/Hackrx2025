@@ -27,22 +27,26 @@ def get_pinecone_index():
     return pc.Index(index_name)
 
 def get_embeddings_from_namespace(pinecone_index, id_to_check, top_k: int = 1000):
-
-    dummy_vector = [0] * 3072  # Adjust based on embedding dimension
+    dummy_vector = [0] * 3072  # Adjust dimension
     result = pinecone_index.query(
         vector=dummy_vector,
-        top_k= top_k,
+        top_k=top_k,
         namespace=id_to_check,
         include_metadata=True,
         include_values=True
     )
     matches = result.to_dict().get("matches", [])
 
-    return matches
+    # Convert to desired structure
+    embeddings = [
+        {"embedding": m["values"], "metadata": m["metadata"]}
+        for m in matches
+    ]
+
+    return embeddings
 
 def store_embeddings(chunks, index_id, pinecone_index):
     
-
     # Generate all embeddings in one request (contents = list of strings)
     response = client.models.embed_content(
         model="gemini-embedding-001",

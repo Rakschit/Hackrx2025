@@ -28,15 +28,11 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     pinecone_index = get_pinecone_index()
     has_embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
 
-    if has_embeddings:
-        embeddings = [
-        {"embedding": match["values"], "metadata": match["metadata"]}
-        for match in has_embeddings
-    ]
-    else:
+    embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
+
+    if not embeddings: 
         chunks = prepare_for_embeddings(text, page)
         embeddings = create_embeddings(chunks, file_id, pinecone_index)
-
 
     questions = request.questions
     top_matches_all = search_relevant_chunks(questions, embeddings)
