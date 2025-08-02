@@ -108,7 +108,7 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
         # Generate embedding for the question using Gemini
         query_response = genai.embed_content(
             model="models/text-embedding-004",
-            contents=[question]
+            content=[question]
         )
         # Extract the embedding vector
         query_embedding = np.array(
