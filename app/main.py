@@ -61,7 +61,7 @@ async def run_query(request: RunRequest):
     start = time.time()
     top_matches_all = search_relevant_chunks(questions, embeddings)
     timings["search_relevant_chunks"] = time.time() - start
-    """
+    
     answers_list = []
     for q in questions:
         start_q = time.time()
@@ -70,7 +70,7 @@ async def run_query(request: RunRequest):
         # use gemini when uploading
         answers_list.append(generate_answer_with_gemini(q, top_matches_all))
         timings[f"generate_answer_with_llm_{q}"] = time.time() - start_q
-    """
+
     # Removing temporary file after processing
     try:
         os.remove(temp_path)
@@ -78,7 +78,7 @@ async def run_query(request: RunRequest):
         pass
 
     return {
-       # "answers": answers_list,
+       "answers": answers_list,
         "timings": timings
     }
 

@@ -108,11 +108,12 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
         # Generate embedding for the question using Gemini
         query_response = genai.embed_content(
             model="models/text-embedding-004",
-            content=[question]
+            content=[question],
+            task_type="RETRIEVAL_QUERY"
         )
         # Extract the embedding vector
         query_embedding = np.array(
-            query_response.embeddings[0].values
+            query_response['embedding']
         ).reshape(1, -1)
 
         # Compute cosine similarity
