@@ -65,6 +65,8 @@ def store_embeddings(chunks, index_id, pinecone_index):
             emb.values,     # embedding vector from list
             metadata
         ))
+    
+    return embeddings
 
     # Upload all embeddings to Pinecone
     pinecone_index.upsert(
@@ -73,8 +75,8 @@ def store_embeddings(chunks, index_id, pinecone_index):
     )
 
 def create_embeddings(chunks,index_id, pinecone_index):
-    store_embeddings(chunks, index_id, pinecone_index)
-    return 
+    embeddings = store_embeddings(chunks, index_id, pinecone_index)
+    return embeddings
 
 
 def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
