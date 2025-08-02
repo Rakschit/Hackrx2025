@@ -44,21 +44,29 @@ def create_embeddings(chunks, index_id):
         contents=chunks              # pass the whole list
     )
 
+    BATCH_SIZE = 100
     embeddings = []
+
+    for start in range(0, len(chunks), BATCH_SIZE):
+        batch = chunks[start:start + BATCH_SIZE]
+
+    response = client.models.batch_embed_contents(
+        model="text-embedding-004",
+        requests=[{"content": text} for text in batch]
+    )
+
     for i, emb in enumerate(response.embeddings):
         metadata = {
-            "text": chunks[i],
+            "text": batch[i],
             "file_id": index_id,
             "version": DATA_PROCESSING_VERSION
         }
-        
         embeddings.append((
-            f"{index_id}-{i}",  
-            emb.values,         
-            metadata            
+            f"{index_id}-{start+i}",
+            emb.values,
+            metadata
         ))
-
-    return "embeddings upserted"
+    return embeddings
 
 """
     for i, vector in enumerate(embeddings):
