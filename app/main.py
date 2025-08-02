@@ -35,10 +35,12 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
         embeddings = create_embeddings(chunks, file_id, pinecone_index)
 
     questions = request.questions
+
     top_matches_all = search_relevant_chunks(questions, embeddings)
-    answer = generate_answer_with_groq(questions, embeddings)
-
-
+    answers_list = [
+        generate_answer_with_groq(q, embeddings, top_k=3)
+        for q in questions
+    ]
 
     # Removing temporary file after processing
     try:
@@ -46,7 +48,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
     except FileNotFoundError:
         pass
 
-    return answer
+    return answers_list
 
 @app.post("/")
 def read_root():
