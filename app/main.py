@@ -48,8 +48,7 @@ async def run_query(request: RunRequest, _: None = Depends(verify_bearer)):
         "extension": file_extension,
         "questions": request.questions,
         "page": page,
-        "chunks length": len(chunks),
-        "message": msg
+        "chunks length": len(chunks)
     }
 
 @app.post("/")
