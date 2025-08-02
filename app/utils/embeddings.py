@@ -57,7 +57,7 @@ def store_embeddings(chunks: list, index_id: str, pinecone_index):
     embeddings_list = response['embedding']
 
     vectors_to_upsert = []
-    processed_embeddings = []
+    embeddings = []
 
     for i, emb_vector in enumerate(embeddings_list):
         metadata = {
@@ -72,7 +72,7 @@ def store_embeddings(chunks: list, index_id: str, pinecone_index):
         ))
 
         # For the return value
-        processed_embeddings.append({
+        embeddings.append({
             "embedding": emb_vector, 
             "metadata": metadata
         })
@@ -81,7 +81,7 @@ def store_embeddings(chunks: list, index_id: str, pinecone_index):
         vectors=vectors_to_upsert,
         namespace=index_id
     )
-    return processed_embeddings
+    return embeddings
 
 def create_embeddings(chunks,index_id, pinecone_index):
     embeddings = store_embeddings(chunks, index_id, pinecone_index)
@@ -164,10 +164,6 @@ def generate_answer_with_groq(question: str, top_matches_all: dict, top_k: int =
     # 5. Return the answer text
     return chat_completion.choices[0].message.content.strip()
 
-
-
-import google.generativeai as genai
-genai.configure(api_key = os.getenv("GEMINI_API_KEY"))
 
 def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int = 3):
     

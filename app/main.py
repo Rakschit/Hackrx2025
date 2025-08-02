@@ -57,11 +57,11 @@ async def run_query(request: RunRequest):
         timings["create_embeddings"] = time.time() - start
 
     questions = request.questions
-    """
+    
     start = time.time()
     top_matches_all = search_relevant_chunks(questions, embeddings)
     timings["search_relevant_chunks"] = time.time() - start
-    
+    """
     answers_list = []
     for q in questions:
         start_q = time.time()
@@ -79,7 +79,6 @@ async def run_query(request: RunRequest):
 
     return {
        # "answers": answers_list,
-       "embeddings": embeddings,
         "timings": timings
     }
 
