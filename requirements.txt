@@ -5,3 +5,4 @@ PyMuPDF
 nltk
 pydantic
 requests
+pinecone
