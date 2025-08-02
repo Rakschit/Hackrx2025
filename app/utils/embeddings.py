@@ -78,6 +78,9 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
     Given one or more questions and pre-computed embeddings,
     returns the top_k relevant chunks for each question using Gemini embeddings.
     """
+    if not embeddings:
+        raise ValueError("No embeddings were provided to search_relevant_chunks.")
+
     # Ensure questions is a list
     if isinstance(questions, str):
         questions = [questions]
@@ -90,7 +93,7 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
     for question in questions:
         # Generate embedding for the question using Gemini
         query_response = client.models.embed_content(
-            model="gemini-embedding-001",  # Gemini embedding model
+            model="gemini-embedding-001",
             contents=[question]
         )
 
@@ -111,6 +114,7 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
         results_all[question] = results
 
     return results_all
+
 
 
 def generate_answer_with_groq(question: str, embeddings: list, top_k: int = 3):
