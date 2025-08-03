@@ -75,13 +75,13 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         start = time.time()
         embeddings = create_embeddings(chunks, file_id, pinecone_index)
         timings["create_embeddings"] = time.time() - start
-    
+    """
     start = time.time()
     top_matches_all = search_relevant_chunks(questions, embeddings)
     timings["search_relevant_chunks"] = time.time() - start
 
     answers_list = []
-    """
+    
     for q in questions:
         start_q = time.time()
         
