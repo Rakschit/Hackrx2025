@@ -80,7 +80,7 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
     top_matches_all = search_relevant_chunks(questions, embeddings)
     timings["search_relevant_chunks"] = time.time() - start
 
-    answers_list = []
+    
     """
     for q in questions:
         start_q = time.time()
@@ -97,8 +97,8 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         answers_list.append(generate_answers_with_gemini(q, top_matches_all))
         timings[f"generate_answer_with_llm_{i}"] = round(time.time() - start_q, 2)
     """
-
     start = time.time()
+    answers_list = []
     answers_list = generate_answers_with_gemini(questions, top_matches_all)
     timings[f"generate_answer_with_llm"] = round(time.time(), 2)
 
