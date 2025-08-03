@@ -196,8 +196,8 @@ def generate_answers_with_gemini(questions, top_matches_all, top_k=3):
     combined_prompt = f"""
     Answer each question based only on its context.
     If context is missing, answer "I don't have any context to answer this question."
-    Return the response as a JSON object with a single key "answer", whose value is a list of strings.
-    Do not include code fences, backticks, or any text before/after the JSON.
+    Return only the answers, each answer separated by a blank line. 
+    Do not include extra text or numbering.
 
     Questions and contexts:
 
@@ -205,5 +205,5 @@ def generate_answers_with_gemini(questions, top_matches_all, top_k=3):
     """
 
     response = generative_model.generate_content(combined_prompt)
-    parsed = json.loads(response.text)
-    return parsed["answer"]
+    
+    return response
