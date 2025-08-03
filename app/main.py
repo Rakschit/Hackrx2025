@@ -99,8 +99,8 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
     """
 
     start = time.time()
-    generate_answers_with_gemini(questions, top_matches_all)
-    answers_list = timings[f"generate_answer_with_llm"] = round(time.time(), 2)
+    answers_list = generate_answers_with_gemini(questions, top_matches_all)
+    timings[f"generate_answer_with_llm"] = round(time.time(), 2)
 
     # Removing temporary file after processing
     try:
