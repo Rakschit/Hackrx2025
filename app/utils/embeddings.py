@@ -166,33 +166,52 @@ def generate_answer_with_groq(question: str, top_matches_all: dict, top_k: int =
     # 5. Return the answer text
     return chat_completion.choices[0].message.content.strip()
 
-def generate_answer_with_gemini(questions: str, top_matches_all: dict, top_k: int = 3):
+import json
+import google.generativeai as genai
+
+generative_model = genai.GenerativeModel("gemini-2.5-flash-lite")
+
+def generate_answers_with_gemini(questions, top_matches_all, top_k=3):
+    """
+    Takes multiple questions and their top matches, and returns all answers in one Gemini call.
+    Returns a list of answers in the same order as `questions`.
+    """
+    if isinstance(questions, str):
+        questions = [questions]
 
     qa_blocks = []
-    for q in questions:
-        if q not in top_matches_all or not top_matches_all[q]:
-            qa_blocks.append(f"Question: {q}\nContext: (no context available)\n")
-        else:
-            top_matches = top_matches_all[q][:top_k]
-            context = "\n\n".join([
-                match_item["metadata"]["text"]
-                for match_item in top_matches
-            ])
-            qa_blocks.append(f"Question: {q}\nContext:\n{context}\n")
+    for question in questions:
+        if question not in top_matches_all or not top_matches_all[question]:
+            qa_blocks.append(f"Question: {question}\nContext: (no context available)\n")
+            continue
 
-    prompt = f"""
+        top_matches = top_matches_all[question][:top_k]
+
+        context_parts = []
+        for match_item in top_matches:
+            if isinstance(match_item, tuple):
+                context_parts.append(match_item[1]["metadata"]["text"])
+            else:
+                context_parts.append(match_item["metadata"]["text"])
+
+        context = "\n\n".join(context_parts)
+        qa_blocks.append(f"Question: {question}\nContext:\n{context}\n")
+
+    # Combine into one structured prompt
+    combined_prompt = f"""
     Answer clearly and concisely using only the information from the provided document, in one short paragraph.
     In a way that you are a helpful assistant giving human like response. give separate answer for each questions.
     Also give reference from where it was taken if the list is long in sentence.
+    Return the output as a JSON list of answers in the same order as the questions.
 
     {chr(10).join(qa_blocks)}
     """
 
-    # 3. Initialize the Gemini model
-    model = genai.GenerativeModel("gemini-2.5-flash-lite")
+    response = generative_model.generate_content(combined_prompt)
 
-    # 4. Generate the content using the Gemini API
-    response = model.generate_content(prompt)
+    try:
+        answers = json.loads(response.text)
+    except json.JSONDecodeError:
+        answers = [ans.strip() for ans in response.text.split("\n\n")]
 
-    # 5. Return the cleaned-up response text
-    return response.text.strip()
+    return answers
