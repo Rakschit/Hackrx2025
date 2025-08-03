@@ -166,44 +166,37 @@ def generate_answer_with_groq(question: str, top_matches_all: dict, top_k: int =
     # 5. Return the answer text
     return chat_completion.choices[0].message.content.strip()
 
-import json
-import google.generativeai as genai
+def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int = 3):
+    
+    # 1. Select the top k matching text snippets for context
+    # This part of the logic remains the same.
 
-generative_model = genai.GenerativeModel("gemini-2.5-flash-lite")
+    if question not in top_matches_all or not top_matches_all[question]:
+        return "I don't have any context to answer this question."
 
-def generate_answers_with_gemini(questions, top_matches_all, top_k=3):
-    if isinstance(questions, str):
-        questions = [questions]
+    top_matches = top_matches_all[question][:top_k]
 
-    qa_blocks = []
-    for question in questions:
-        if question not in top_matches_all or not top_matches_all[question]:
-            qa_blocks.append(f"Question: {question}\nContext: (no context available)\n")
-            continue
+    context = "\n\n".join([
+        match_item["metadata"]["text"] for _, match_item in top_matches
+    ])
 
-        top_matches = top_matches_all[question][:top_k]
+    # 2. Construct the prompt for the Gemini model
+    # The prompt structure is clear and works well with Gemini.
+    prompt = f"""Answer clearly and concisely using only the information from the provided document, in one short paragraph.
+    in a way that you are a helpful assistant giving human like response.
 
-        context_parts = []
-        for match_item in top_matches:
-            if isinstance(match_item, tuple):
-                context_parts.append(match_item[1]["metadata"]["text"])
-            else:
-                context_parts.append(match_item["metadata"]["text"])
+    Context:
+    {context}
 
-        context = "\n\n".join(context_parts)
-        qa_blocks.append(f"Question: {question}\nContext:\n{context}\n")
-
-    combined_prompt = f"""
-    Answer each question based only on its context.
-    If context is missing, answer "I don't have any context to answer this question."
-    Return only the answers, each answer separated by a blank line. 
-    Do not include extra text or numbering.
-
-    Questions and contexts:
-
-    {chr(10).join(qa_blocks)}
+    Question:
+    {question}
     """
 
-    response = generative_model.generate_content(combined_prompt)
-    
-    return response
+    # 3. Initialize the Gemini model
+    model = genai.GenerativeModel("gemini-2.5-flash-lite")
+
+    # 4. Generate the content using the Gemini API
+    response = model.generate_content(prompt)
+
+    # 5. Return the cleaned-up response text
+    return response.text.strip()
