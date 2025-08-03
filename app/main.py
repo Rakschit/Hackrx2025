@@ -103,7 +103,7 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         os.remove(temp_path)
     except FileNotFoundError:
         pass
-    """
+    
     # ---- DATABASE INSERTION ----
     total_time = time.time() - request_start
     total_time_ms = int(total_time * 1000)
@@ -113,10 +113,9 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
     timings_json = json.dumps(timings)
 
     insert_hackrx_logs(file_id, doc_url, questions_json, answers_json, total_time_ms, timings_json)
-    """
+   
     return {
-      "answers": answers_list,
-       "time": timings
+      "answers": answers_list
     }
 
 
