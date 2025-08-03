@@ -9,7 +9,7 @@ import json
 from app.utils.validators import verify_bearer, validate_request
 from app.utils.text_extraction import extract_text_from_pdf
 from app.utils.data_processing import prepare_for_embeddings
-from app.utils.embeddings import create_embeddings, get_pinecone_index, get_embeddings_from_namespace, search_relevant_chunks, generate_answer_with_groq, generate_answer_with_gemini
+from app.utils.embeddings import create_embeddings, get_pinecone_index, get_embeddings_from_namespace, search_relevant_chunks, generate_answer_with_groq, generate_answers_with_gemini
 from app.models import RunRequest
 from app.db import insert_hackrx_logs
 
@@ -86,12 +86,21 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         start_q = time.time()
         
         answers_list.append(generate_answer_with_gemini(q, top_matches_all))
-        timings[f"generate_answer_with_llm_{q}"] = time.time() - start_q
+        timings[f"generate_answers_with_llm_{q}"] = time.time() - start_q
+        
+    
+    for i, q in enumerate(questions, start=1):
+        start_q = time.time()
+        # use groq when testing
+        # answers_list.append(generate_answer_with_groq(q, top_matches_all))
+        # use gemini when uploading
+        answers_list.append(generate_answers_with_gemini(q, top_matches_all))
+        timings[f"generate_answer_with_llm_{i}"] = round(time.time() - start_q, 2)
     """
-    start = time.time()
-    generate_answer_with_gemini(questions, top_matches_all)
-    answers_list = timings[f"generate_answer_with_llm"] = round(time.time(), 2)
 
+    start = time.time()
+    generate_answers_with_gemini(questions, top_matches_all)
+    answers_list = timings[f"generate_answer_with_llm"] = round(time.time(), 2)
 
     # Removing temporary file after processing
     try:
