@@ -208,6 +208,4 @@ def generate_answers_with_gemini(questions, top_matches_all, top_k=3):
     """
 
     response = generative_model.generate_content(combined_prompt)
-    answers = [ans.strip() for ans in response.text.split("\n\n")]
-
-    return answers
+    return json.loads(response.text)
