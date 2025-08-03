@@ -75,13 +75,11 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         start = time.time()
         embeddings = create_embeddings(chunks, file_id, pinecone_index)
         timings["create_embeddings"] = time.time() - start
-    """
+   
     start = time.time()
     top_matches_all = search_relevant_chunks(questions, embeddings)
     timings["search_relevant_chunks"] = time.time() - start
 
-    
-    """
     """
     for q in questions:
         start_q = time.time()
@@ -89,7 +87,7 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         answers_list.append(generate_answer_with_gemini(q, top_matches_all))
         timings[f"generate_answer_with_llm_{q}"] = time.time() - start_q
     """
-    """
+
     answers_list = []
     for i, q in enumerate(questions, start=1):
         start_q = time.time()
@@ -105,7 +103,7 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         os.remove(temp_path)
     except FileNotFoundError:
         pass
-
+    """
     # ---- DATABASE INSERTION ----
     total_time = time.time() - request_start
     total_time_ms = int(total_time * 1000)
@@ -117,7 +115,7 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
     insert_hackrx_logs(file_id, doc_url, questions_json, answers_json, total_time_ms, timings_json)
     """
     return {
-      # "answers": answers_list,
+      "answers": answers_list,
        "time": timings
     }
 
