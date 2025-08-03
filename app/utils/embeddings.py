@@ -172,10 +172,6 @@ import google.generativeai as genai
 generative_model = genai.GenerativeModel("gemini-2.5-flash-lite")
 
 def generate_answers_with_gemini(questions, top_matches_all, top_k=3):
-    """
-    Takes multiple questions and their top matches, and returns all answers in one Gemini call.
-    Returns a list of answers in the same order as `questions`.
-    """
     if isinstance(questions, str):
         questions = [questions]
 
@@ -197,15 +193,17 @@ def generate_answers_with_gemini(questions, top_matches_all, top_k=3):
         context = "\n\n".join(context_parts)
         qa_blocks.append(f"Question: {question}\nContext:\n{context}\n")
 
-    # Combine into one structured prompt
     combined_prompt = f"""
-    Answer clearly and concisely using only the information from the provided document, in one short paragraph.
-    In a way that you are a helpful assistant giving human like response. give separate answer for each questions.
-    Also give reference from where it was taken if the list is long in sentence.
-    Return the output as a JSON list of answers in the same order as the questions.
+    Answer each question based only on its context.
+    If context is missing, answer "I don't have any context to answer this question."
+    Return the response as a JSON object with a single key "answer", whose value is a list of strings.
+    Do not include code fences, backticks, or any text before/after the JSON.
+
+    Questions and contexts:
 
     {chr(10).join(qa_blocks)}
     """
 
     response = generative_model.generate_content(combined_prompt)
-    return json.loads(response.text)
+    parsed = json.loads(response.text)
+    return parsed["answer"]
