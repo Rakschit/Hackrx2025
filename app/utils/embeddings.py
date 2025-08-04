@@ -48,7 +48,7 @@ def get_embeddings_from_namespace(pinecone_index, id_to_check, top_k: int = 1000
 
 def store_embeddings(chunks: list, index_id: str, pinecone_index):
     response = genai.embed_content(
-        model="models/text-embedding-004",
+        model="models/gemini-embedding-001",
         content=chunks,  
         task_type="RETRIEVAL_DOCUMENT",
         output_dimensionality=768
@@ -107,7 +107,7 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
     for question in questions:
         # Generate embedding for the question using Gemini
         query_response = genai.embed_content(
-            model="models/text-embedding-004", # models/text-embedding-004
+            model="models/gemini-embedding-001", # models/gemini-embedding-001
             content=[question],
             task_type="RETRIEVAL_QUERY",
             output_dimensionality=768
