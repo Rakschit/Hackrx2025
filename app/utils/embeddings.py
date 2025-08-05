@@ -234,7 +234,7 @@ def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int
     """
 
     # 3. Initialize the Gemini model
-    model = genai.GenerativeModel("gemini-2.5-flash-lite")
+    model = genai.GenerativeModel("gemini-1.5-flash-8b-latest") # gemini-1.5-flash-8b-latest # gemini-2.5-flash-lite
 
     # 4. Generate the content using the Gemini API
     response = model.generate_content(prompt)
