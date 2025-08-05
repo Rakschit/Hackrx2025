@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request, Depends
 import os, shutil
 import hashlib
-from pinecone import Pinecone
 import uuid
 import time
 import json
@@ -13,7 +12,11 @@ from app.utils.embeddings import create_embeddings, get_pinecone_index, get_embe
 from app.models import RunRequest
 from app.db import insert_hackrx_logs
 
+
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 app = FastAPI()
+
 
 def file_id_creation(text):
     random_id = str(uuid.uuid4())
@@ -21,7 +24,18 @@ def file_id_creation(text):
 
 #@app.post("/hackrx/run")
 
-@app.api_route("/hackrx/run", methods=["GET","POST"])
+@app.get("/hackrx/run")
+async def run_query_get():
+    return {"message": "GET request received - no auth required"}
+
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
+
+# Serve favicon explicitly
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(os.path.join(os.path.dirname(__file__), "static", "favicon.ico"))
+
+@app.post("/hackrx/run")
 async def run_query(request: Request, _: None = Depends(verify_bearer)):
     request_start = time.time()
     timings = {}

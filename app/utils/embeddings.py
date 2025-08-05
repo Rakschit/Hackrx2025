@@ -5,7 +5,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 from groq import Groq
 # from google import genai
 import google.generativeai as genai
+from dotenv import load_dotenv
 
+load_dotenv()
 index_name = "hackrxindex"
 DATA_PROCESSING_VERSION = "v1"
 
