@@ -15,7 +15,7 @@ pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 genai.configure(
     api_key=gemini_api_key,
-    client_options= " asia-southeast1-generativelanguage.googleapis.com"
+    client_options= {"api_endpoint": "asia-southeast1-generativelanguage.googleapis.com"}
     )
 
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
