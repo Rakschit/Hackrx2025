@@ -196,7 +196,7 @@ def generate_answer_with_groq(question: str, top_matches_all: dict, top_k: int =
     # 5. Return the answer text
     return chat_completion.choices[0].message.content.strip()
 
-def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int = 3):
+def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int = 5):
     
     # 1. Select the top k matching text snippets for context
     # This part of the logic remains the same.
