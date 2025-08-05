@@ -13,10 +13,7 @@ pc_key=os.getenv("PINECONE_API_KEY")
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY")) 
 
 gemini_api_key = os.getenv("GEMINI_API_KEY")
-genai.configure(
-    api_key=gemini_api_key,
-    client_options= {"api_endpoint": "generativelanguage.googleapis.com"}
-    )
+genai.configure(api_key=gemini_api_key)
 
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
@@ -51,7 +48,7 @@ def get_embeddings_from_namespace(pinecone_index, id_to_check, top_k: int = 1000
 
 def store_embeddings(chunks: list, index_id: str, pinecone_index):
     response = genai.embed_content(
-        model="models/gemini-embedding-001",
+        model="models/text-embedding-004",
         content=chunks,  
         task_type="RETRIEVAL_DOCUMENT",
         output_dimensionality=768
