@@ -48,7 +48,7 @@ def get_embeddings_from_namespace(pinecone_index, id_to_check, top_k: int = 1000
 
 def store_embeddings(chunks: list, index_id: str, pinecone_index):
     response = genai.embed_content(
-        model="models/gemini-embedding-001",
+        model="models/text-embedding-004",
         content=chunks,  
         task_type="RETRIEVAL_DOCUMENT",
         output_dimensionality=768
@@ -103,7 +103,7 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
     chunk_vectors = np.array([np.array(item["embedding"]) for item in embeddings])
 
     results_all = {}
-
+    """
     for question in questions:
         # Generate embedding for the question using Gemini
         query_response = genai.embed_content(
@@ -127,6 +127,34 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
         results = [(similarity_scores[i], embeddings[i]) for i in ranked_indices]
 
         results_all[question] = results
+    """
+    query_response = genai.embed_content(
+        model="models/text-embedding-004",  # <--- UPGRADED MODEL
+        content=questions,
+        task_type="RETRIEVAL_QUERY",
+        output_dimensionality=768 # Optional: specify dimension for gemini-embedding-001
+    )
+
+    query_embeddings = np.array(query_response['embedding'])
+    similarity_matrix = cosine_similarity(query_embeddings, chunk_vectors)
+
+    results_all = {}
+
+    for i, question in enumerate(questions):
+        # Get all scores for the current question from the matrix
+        similarity_scores = similarity_matrix[i]
+
+        # Get the indices of the top_k scores
+        ranked_indices = np.argsort(similarity_scores)[::-1][:top_k]
+
+        # Use a list comprehension for clean and efficient result formatting
+        results_all[question] = [
+            {
+                "score": similarity_scores[index],
+                "metadata": embeddings[index]["metadata"]
+            }
+            for index in ranked_indices
+        ]
 
     return results_all
 
@@ -171,13 +199,16 @@ def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int
     # 1. Select the top k matching text snippets for context
     # This part of the logic remains the same.
 
+    """
     if question not in top_matches_all or not top_matches_all[question]:
         return "I don't have any context to answer this question."
-
+    """
+    
     top_matches = top_matches_all[question][:top_k]
 
     context = "\n\n".join([
-        match_item["metadata"]["text"] for _, match_item in top_matches
+        # match_item["metadata"]["text"] for _, match_item in top_matches
+        match_item["metadata"]["text"] for match_item in top_matches
     ])
 
     # 2. Construct the prompt for the Gemini model
