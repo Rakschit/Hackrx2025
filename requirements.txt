@@ -11,3 +11,4 @@ scikit-learn
 groq
 google-generativeai
 psycopg2-binary
+python-dotenv
