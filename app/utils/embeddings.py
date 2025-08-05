@@ -129,7 +129,7 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
         results_all[question] = results
     """
     query_response = genai.embed_content(
-        model="models/gemini-embedding-001",  # <--- UPGRADED MODEL
+        model="models/text-embedding-004",  # <--- UPGRADED MODEL
         content=questions,
         task_type="RETRIEVAL_QUERY",
         output_dimensionality=768 # Optional: specify dimension for text-embedding-004
@@ -213,9 +213,17 @@ def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int
 
     # 2. Construct the prompt for the Gemini model
     # The prompt structure is clear and works well with Gemini.
-    prompt = f"""Answer clearly and concisely using only the information from the provided document, in one short paragraph.
-    in a way that you are a helpful assistant giving human like response.
+    prompt = f"""
+    You are an expert Question & Answer assistant giving human like response. Your task is to answer the user's question based ONLY on the provided context.
 
+    **Do not use any of your own internal knowledge.**
+
+    **Follow these instructions precisely:**
+    1. Read the context below carefully.
+    2. Analyze the user's question.
+    3. Answer clearly and concisely using only the information from the provided document, in one short paragraph.
+    4. If the answer cannot be found in the context, you must respond with: "I'm sorry, but I cannot answer this question based on the information provided."
+    
     Context:
     {context}
 
