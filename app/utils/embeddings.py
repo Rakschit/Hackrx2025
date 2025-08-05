@@ -48,7 +48,7 @@ def get_embeddings_from_namespace(pinecone_index, id_to_check, top_k: int = 1000
 
 def store_embeddings(chunks: list, index_id: str, pinecone_index):
     response = genai.embed_content(
-        model="models/text-embedding-004",
+        model="models/gemini-embedding-001",
         content=chunks,  
         task_type="RETRIEVAL_DOCUMENT",
         output_dimensionality=768
@@ -129,7 +129,7 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
         results_all[question] = results
     """
     query_response = genai.embed_content(
-        model="models/text-embedding-004",  # <--- UPGRADED MODEL
+        model="models/gemini-embedding-001",  # <--- UPGRADED MODEL
         content=questions,
         task_type="RETRIEVAL_QUERY",
         output_dimensionality=768 # Optional: specify dimension for gemini-embedding-001
@@ -203,7 +203,7 @@ def generate_answer_with_gemini(question: str, top_matches_all: dict, top_k: int
     if question not in top_matches_all or not top_matches_all[question]:
         return "I don't have any context to answer this question."
     """
-    
+
     top_matches = top_matches_all[question][:top_k]
 
     context = "\n\n".join([
