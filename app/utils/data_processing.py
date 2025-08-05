@@ -26,16 +26,14 @@ def clean_text(text: str, page_count: int) -> str:
     # Count frequency of lines
     line_counts = Counter(lines)
 
-    """
     # Threshold: max 3
     freq_threshold = min(page_count, 3)
 
     # Remove frequent lines
     cleaned_lines = [
-        line for line in lines if line_counts[line] < freq_threshold
+        line for line in lines 
+        if not (line_counts[line] >= freq_threshold and len(line.split()) > 7)
     ]
-    """
-    cleaned_lines = lines
     # Join list back into a string
     text = " ".join(cleaned_lines)
 
