@@ -13,7 +13,10 @@ pc_key=os.getenv("PINECONE_API_KEY")
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY")) 
 
 gemini_api_key = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=gemini_api_key)
+genai.configure(
+    api_key=gemini_api_key,
+    client_options= " asia-southeast1-generativelanguage.googleapis.com"
+    )
 
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
@@ -107,7 +110,7 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
     for question in questions:
         # Generate embedding for the question using Gemini
         query_response = genai.embed_content(
-            model="models/gemini-embedding-001", # models/gemini-embedding-001
+            model="models/text-embedding-004", # models/text-embedding-004
             content=[question],
             task_type="RETRIEVAL_QUERY",
             output_dimensionality=768
@@ -132,7 +135,7 @@ def search_relevant_chunks(questions, embeddings: list, top_k: int = 3):
         model="models/gemini-embedding-001",  # <--- UPGRADED MODEL
         content=questions,
         task_type="RETRIEVAL_QUERY",
-        output_dimensionality=768 # Optional: specify dimension for gemini-embedding-001
+        output_dimensionality=768 # Optional: specify dimension for text-embedding-004
     )
 
     query_embeddings = np.array(query_response['embedding'])
