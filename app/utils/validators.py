@@ -9,15 +9,13 @@ from app.models import RunRequest
 BEARER_API_KEY = os.getenv("BEARER_API_KEY")
 
 def verify_bearer(authorization: str = Header(None)): #CHANGE THE BEARER KEY AS SAME AS THE PROBLEM STATEMENT
-    return
-    """
     if not BEARER_API_KEY:
         raise HTTPException(status_code=500, detail="Server misconfiguration: BEARER_API_KEY not set")
     
     valid_keys = [f"Bearer {BEARER_API_KEY}", BEARER_API_KEY]
     if authorization not in valid_keys:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    """
+    
 # ALLOWED FILES TO UPLOAD
 allowed_types = {
     "application/pdf": "pdf",
