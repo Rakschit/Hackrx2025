@@ -182,13 +182,12 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
 
         insert_hackrx_logs(
             file_id=file_id,
-            doc_url=validated_url,
-            questions_json=json.dumps(questions),
-            answers_json=json.dumps(answers_list),
+            file_link=validated_url,
+            questions=json.dumps(questions),
+            answers=json.dumps(answers_list),
             total_time_ms=total_time_ms,
-            timings_json=json.dumps(timings)
+            timings=json.dumps(timings)
         )
-
         return {"answers": answers_list}
     
     except HTTPException as http_exc:
