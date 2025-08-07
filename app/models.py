@@ -2,5 +2,5 @@ from pydantic import BaseModel, HttpUrl
 from typing import List
 
 class RunRequest(BaseModel):
-    document: HttpUrl
+    documents: HttpUrl
     questions: List[str]

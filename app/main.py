@@ -57,7 +57,7 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         # 1. Parse Request Body
         body = await request.json()
         questions = body.get("questions", [])
-        document_url = body.get("document", "")
+        document_url = body.get("documents", "")
 
         if not document_url or not isinstance(questions, list) or not questions:
             raise HTTPException(
