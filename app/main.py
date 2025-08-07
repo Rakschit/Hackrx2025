@@ -5,6 +5,56 @@ import time
 import json
 import logging
 import tempfile
+import traceback
+# import hashlib
+
+from fastapi import FastAPI, Request, Depends, HTTPException, status
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+from app.utils.validators import verify_bearer, validate_document_url, download_file
+from app.utils.text_extraction import extract_text_from_pdf
+from app.utils.data_processing import prepare_for_embeddings
+from app.utils.embeddings import (create_embeddings, get_pinecone_index, 
+                                  get_embeddings_from_namespace, search_relevant_chunks, 
+                                  generate_answer_with_groq, generate_answer_with_gemini)
+from app.db import insert_hackrx_logs
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI(
+    title="HackRx API",
+    description="API for processing documents and answering questions.",
+    version="1.0.0"
+)
+
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+# Serve favicon explicitly
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(os.path.join(static_dir, "favicon.ico"))
+
+def file_id_creation():
+    return str(uuid.uuid4())
+
+@app.get("/", include_in_schema=False)
+def read_root():
+    return {"message": "Welcome to the HackRx API!"}
+
+@app.get("/hackrx/run")
+async def run_query_get():
+    return {"message":  "GET request received - no auth required"}
+
+import os
+import shutil
+import uuid
+import time
+import json
+import logging
+import tempfile
 import traceback # Already imported, now we will use it!
 
 from fastapi import FastAPI, Request, Depends, HTTPException, status
@@ -71,14 +121,14 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         # ... (The rest of your try block is perfect and remains unchanged) ...
         start_time = time.time()
         validated_url, file_extension = validate_document_url(document_url)
-        timings["validate_request"] = round((time.time() - start_time) * 1000)
+        timings["validate_request"] = round((time.time() - start_time))
         logger.info(f"Validated request for document: {validated_url}")
 
         start_time = time.time()
         with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_file:
             temp_path = temp_file.name
         download_file(validated_url, temp_path)
-        timings["download_file"] = round((time.time() - start_time) * 1000)
+        timings["download_file"] = round((time.time() - start_time))
         logger.info(f"File downloaded to temporary path: {temp_path}")
 
         start_time = time.time()
@@ -89,7 +139,7 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
                 detail=f"File extension '.{file_extension}' is valid but text extraction is not implemented."
             )
-        timings["extract_text"] = round((time.time() - start_time) * 1000)
+        timings["extract_text"] = round((time.time() - start_time))
 
         file_id = file_id_creation()
         pinecone_index = get_pinecone_index()
@@ -97,23 +147,23 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
 
         start_time = time.time()
         embeddings = get_embeddings_from_namespace(pinecone_index, file_id)
-        timings["get_embeddings_from_namespace"] = round((time.time() - start_time) * 1000)
+        timings["get_embeddings_from_namespace"] = round((time.time() - start_time))
 
         if not embeddings:
             logger.info(f"No embeddings found for {file_id}. Creating new ones.")
             start_time = time.time()
             chunks = prepare_for_embeddings(text, page)
-            timings["prepare_for_embeddings"] = round((time.time() - start_time) * 1000)
+            timings["prepare_for_embeddings"] = round((time.time() - start_time))
         
             start_time = time.time()
             embeddings = create_embeddings(chunks, file_id, pinecone_index)
-            timings["create_embeddings"] = round((time.time() - start_time) * 1000)
+            timings["create_embeddings"] = round((time.time() - start_time))
         else:
             logger.info(f"Found existing embeddings for {file_id}.")
 
         start_time = time.time()
         top_matches_all = search_relevant_chunks(questions, embeddings)
-        timings["search_relevant_chunks"] = round((time.time() - start_time) * 1000)
+        timings["search_relevant_chunks"] = round((time.time() - start_time))
 
         answers_list = []
         for i, q in enumerate(questions):
@@ -122,7 +172,7 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
             answers_list.append(answer)
             timings[f"generate_answer_llm_{i+1}"] = round(time.time() - start_q_time, 2)
 
-        total_time_ms = int((time.time() - request_start_time) * 1000)
+        total_time_ms = int((time.time() - request_start_time))
         logger.info(f"Total processing time: {total_time_ms}ms")
 
         # IMPORTANT: Double-check that your insert_hackrx_logs function expects 'file_link'
@@ -164,3 +214,8 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
                 logger.info(f"Successfully cleaned up temporary file: {temp_path}")
             except OSError as e:
                 logger.error(f"Error removing temporary file {temp_path}: {e}")
+
+@app.post("/")
+def read_root():
+    text = "Hello Railway!"
+    return text
