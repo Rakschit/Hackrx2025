@@ -36,7 +36,7 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 async def favicon():
     return FileResponse(os.path.join(static_dir, "favicon.ico"))
 
-def file_id_creation(text):
+def file_id_creation():
     return str(uuid.uuid4())
 
 @app.get("/", include_in_schema=False)
