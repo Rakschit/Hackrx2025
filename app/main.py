@@ -183,10 +183,10 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
         insert_hackrx_logs(
             file_id=file_id,
             file_link=validated_url,
-            questions=json.dumps(questions),
-            answers=json.dumps(answers_list),
+            questions_json=json.dumps(questions),
+            answers_json=json.dumps(answers_list),
             total_time_ms=total_time_ms,
-            timings=json.dumps(timings)
+            timings_json=json.dumps(timings)
         )
         return {"answers": answers_list}
     
