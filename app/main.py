@@ -45,7 +45,7 @@ def read_root():
 
 @app.get("/hackrx/run")
 async def run_query_get():
-    return {"message": "GET request received - no auth required"}
+    return {"message":  "GET request received - no auth required"}
 
 @app.post("/hackrx/run")
 async def run_query(request: Request, _: None = Depends(verify_bearer)):
@@ -56,8 +56,14 @@ async def run_query(request: Request, _: None = Depends(verify_bearer)):
     try:
         # 1. Parse Request Body
         body = await request.json()
-        questions = body.get("questions", [])
-        document_url = body.get("documents", "")
+        questions = body.get("questions") or body.get("question")
+        document_url = body.get("document") or body.get("documents") or ""
+    
+        if questions and isinstance(questions, str):
+            # If we received a single string, we wrap it in a list.
+            # The 'questions' variable is now guaranteed to be a list if it exists.
+            logger.info("Question is a list")
+            questions = [questions]
 
         if not document_url or not isinstance(questions, list) or not questions:
             raise HTTPException(
