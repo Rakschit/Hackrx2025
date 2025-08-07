@@ -1,76 +1,104 @@
 import os
-from fastapi import Header, HTTPException
+import secrets
 import requests
 from mimetypes import guess_type
+from urllib.parse import urlparse
 
-from urllib.parse import urlparse, unquote
-from app.models import RunRequest
+from fastapi import Header, HTTPException, status
 
+# --- Environment Variable Loading ---
 BEARER_API_KEY = os.getenv("BEARER_API_KEY")
 
-def verify_bearer(authorization: str = Header(None)): #CHANGE THE BEARER KEY AS SAME AS THE PROBLEM STATEMENT
-    if not BEARER_API_KEY:
-        raise HTTPException(status_code=500, detail="Server misconfiguration: BEARER_API_KEY not set")
-    
-    valid_keys = [f"Bearer {BEARER_API_KEY}", BEARER_API_KEY]
-    if authorization not in valid_keys:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-# ALLOWED FILES TO UPLOAD
-allowed_types = {
+# --- Allowed File Types ---
+ALLOWED_MIME_TYPES = {
     "application/pdf": "pdf",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
-    "message/rfc822": "eml",
+    # Add other supported types here
 }
 
-def validate_request(request):
-    # VALIDATING QUESTION
-    questions = request.questions if hasattr(request, "questions") else request.get("questions")
-    document = request.document if hasattr(request, "document") else request.get("document")
+def verify_bearer(authorization: str = Header(None)):
+    """
+    FastAPI dependency to verify a Bearer token.
+    Uses secrets.compare_digest to prevent timing attacks.
+    """
+    if not BEARER_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server configuration error: BEARER_API_KEY is not set."
+        )
+    
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication scheme. Must use Bearer token."
+        )
 
-    if not questions or not all(isinstance(q, str) for q in questions):
-        raise HTTPException(status_code=400, detail="Questions must be a list of strings")
+    # Extract the token from the "Bearer <token>" string
+    sent_token = authorization.split(" ")[1]
 
-    doc_url = str(document)
+    # Securely compare the sent token with the server's key
+    if not secrets.compare_digest(sent_token, BEARER_API_KEY):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token."
+        )
 
-    resp = requests.head(doc_url, stream=True, allow_redirects=True)
-    doc_type = resp.headers.get("Content-Type", "").lower().split(";")[0].strip()
-    resp.close()
+def validate_document_url(doc_url: str) -> tuple[str, str]:
+    """
+    Validates the document URL and its content type without downloading the file.
 
-    # If content-type is missing from the header
-    # can use python-magic for checking the file type
+    Args:
+        doc_url: The URL of the document to validate.
+
+    Returns:
+        A tuple containing the (validated_url, file_extension).
+    
+    Raises:
+        HTTPException: If the URL is invalid or the file type is not supported.
+    """
+    try:
+        # Check the Content-Type header first using a HEAD request
+        resp = requests.head(doc_url, stream=True, allow_redirects=True, timeout=10)
+        resp.raise_for_status()  # Raise an exception for 4xx/5xx status codes
+        doc_type = resp.headers.get("Content-Type", "").lower().split(";")[0].strip()
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to access document URL: {e}"
+        )
+    finally:
+        if 'resp' in locals():
+            resp.close()
+
+    # If Content-Type is missing, try to guess from the URL path extension
     if not doc_type:
-        parsed = urlparse(doc_url)
-        ext = os.path.splitext(parsed.path)[1].lower()
-        mime, _ = guess_type(parsed.path)
+        parsed_path = urlparse(doc_url).path
+        mime, _ = guess_type(parsed_path)
         doc_type = mime or ""
 
-    # Validate
-    
-    if doc_type not in allowed_types:
+    # Check if the determined MIME type is in our allowed list
+    if doc_type not in ALLOWED_MIME_TYPES:
         raise HTTPException(
-            status_code=400,
-            detail=f"Only pdf, docx, eml files allowed. Got: '{doc_type}'"
-        )    
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported file type '{doc_type}'. Only PDF files are allowed."
+        )
     
-    file_extension = allowed_types[doc_type]
-
-    # Prepare temp file path
-    parsed = urlparse(doc_url)
-    filename = os.path.basename(parsed.path)
-    filename = unquote(filename) if filename else f"tempfile.{file_extension}"
-    temp_path = f"/tmp/{filename}"
-    
-    download_file(doc_url, temp_path) # DOWNLOAD FILE AFTER VALIDATING
-
-    return doc_url, file_extension, temp_path
+    file_extension = ALLOWED_MIME_TYPES[doc_type]
+    return doc_url, file_extension
 
 
-def download_file(doc_url, temp_path):
+def download_file(doc_url: str, temp_path: str):
+    """
+    Downloads a file from a URL to a temporary path.
+    """
     try:
-        r = requests.get(doc_url, timeout=15)
-        r.raise_for_status()
-        with open(temp_path, "wb") as f:
-            f.write(r.content)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Download failed: {e}")
+        with requests.get(doc_url, timeout=15, stream=True) as r:
+            r.raise_for_status()
+            with open(temp_path, "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+    except requests.exceptions.RequestException as e:
+        # Catch specific request-related errors
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Download failed: {e}"
+        )
