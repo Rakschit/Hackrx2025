@@ -5,56 +5,6 @@ import time
 import json
 import logging
 import tempfile
-import traceback
-# import hashlib
-
-from fastapi import FastAPI, Request, Depends, HTTPException, status
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
-
-from app.utils.validators import verify_bearer, validate_document_url, download_file
-from app.utils.text_extraction import extract_text_from_pdf
-from app.utils.data_processing import prepare_for_embeddings
-from app.utils.embeddings import (create_embeddings, get_pinecone_index, 
-                                  get_embeddings_from_namespace, search_relevant_chunks, 
-                                  generate_answer_with_groq, generate_answer_with_gemini)
-from app.db import insert_hackrx_logs
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-app = FastAPI(
-    title="HackRx API",
-    description="API for processing documents and answering questions.",
-    version="1.0.0"
-)
-
-static_dir = os.path.join(os.path.dirname(__file__), "static")
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
-
-# Serve favicon explicitly
-@app.get("/favicon.ico", include_in_schema=False)
-async def favicon():
-    return FileResponse(os.path.join(static_dir, "favicon.ico"))
-
-def file_id_creation():
-    return str(uuid.uuid4())
-
-@app.get("/", include_in_schema=False)
-def read_root():
-    return {"message": "Welcome to the HackRx API!"}
-
-@app.get("/hackrx/run")
-async def run_query_get():
-    return {"message":  "GET request received - no auth required"}
-
-import os
-import shutil
-import uuid
-import time
-import json
-import logging
-import tempfile
 import traceback # Already imported, now we will use it!
 
 from fastapi import FastAPI, Request, Depends, HTTPException, status
@@ -93,6 +43,30 @@ def file_id_creation():
 @app.get("/", include_in_schema=False)
 def read_root():
     return {"message": "Welcome to the HackRx API!"}
+
+# --- THIS IS THE NEW MIDDLEWARE ---
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """
+    Middleware to log incoming requests.
+    This logs the client's IP, the request method, URL, and headers.
+    """
+    # Log basic request info
+    logger.info(f"Incoming request from client: {request.client.host}")
+    logger.info(f"Request path: {request.method} {request.url}")
+    
+    # Log headers
+    # Convert headers to a plain dict for clean logging
+    headers = dict(request.headers)
+    logger.info(f"Request headers: {headers}")
+
+    # The 'call_next' function passes the request to the actual path operation
+    response = await call_next(request)
+    
+    # You can also log response status code here if needed
+    logger.info(f"Response status code: {response.status_code}")
+    
+    return response
 
 # --- Main Application Logic ---
 @app.post("/hackrx/run")
